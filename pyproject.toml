@@ -5,6 +5,7 @@ description = "Health adjusted age ..."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "flax>=0.12.3",  # fix 2026-02-09
     "jax>=0.4.38",
     "jaxlib>=0.4.38",
     "matplotlib>=3.10.0",
