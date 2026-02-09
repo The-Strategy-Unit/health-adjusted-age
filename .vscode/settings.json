@@ -22,6 +22,7 @@
     "**/.pytest_cache": true
   },
   /* custom */
+  "files.eol": "\n",
   "editor.wordWrap": "on",
   "editor.tabSize": 2,
   "editor.rulers": [90, 120],
