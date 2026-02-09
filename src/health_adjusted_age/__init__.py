@@ -2,9 +2,6 @@
 
 from .config import DEFAULT_CONFIG, ModelConfig
 from .fitting import fit_all_metalogs
+from .qa_fitting import run_qa
 
-__all__ = [
-    "fit_all_metalogs",
-    "ModelConfig",
-    "DEFAULT_CONFIG",
-]
+__all__ = ["DEFAULT_CONFIG", "ModelConfig", "fit_all_metalogs", "run_qa"]
