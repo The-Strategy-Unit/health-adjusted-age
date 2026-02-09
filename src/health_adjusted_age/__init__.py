@@ -1,17 +1,10 @@
-"""Main module for my-python-project."""
+"""Public API"""
 
+from .config import DEFAULT_CONFIG, ModelConfig
+from .fitting import fit_all_metalogs
 
-def hello(name: str = "World") -> str:
-    """Return a greeting message.
-
-    Args:
-        name: The name to greet
-
-    Returns:
-        A greeting message
-    """
-    return f"Hello, {name}!"
-
-
-if __name__ == "__main__":
-    print(hello())
+__all__ = [
+    "fit_all_metalogs",
+    "ModelConfig",
+    "DEFAULT_CONFIG",
+]
