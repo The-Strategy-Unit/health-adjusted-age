@@ -14,6 +14,10 @@ HEALTH-ADJUSTED-AGE/
     └── test_main.py        # example testsource  
 
 ```bash
-uv run python src/health_adjusted_age/__init__.py
+uv pip install -e .
+# long-hand
+uv run python src/health_adjusted_age/__main__.py
+# canonical
+python -m health_adjusted_age
 pytest
 ```
