@@ -21,5 +21,41 @@ uv run python src/health_adjusted_age/__main__.py
 python -m health_adjusted_age
 # [project.scripts] table CLI entry point (in pyproject.toml)
 uv run pipeline
-pytest
+# tests
+uv run pytest
+```
+
+health-adjusted-age python package now has:
+- a **library** (importable, testable)
+- a **pipeline** (single entry point)
+- a **config system** (immutable, overrideable)
+- a **CLI / script surface**
+
+```bash
+# run health-adjusted-age pipeline as a library
+from health_adjusted_age import run_pipeline, DEFAULT_CONFIG
+run_pipeline(DEFAULT_CONFIG)
+
+# run as a module
+python -m health_adjusted_age
+
+# run as CLI command
+uv run pipeline
+```
+
+```bash
+# changing config options the canonical way
+from dataclasses import replace
+from health_adjusted_age import run_pipeline, DEFAULT_CONFIG
+
+config = replace(
+    DEFAULT_CONFIG,
+    target_years=(2035,),
+    n_samples=500,
+)
+
+summary, samples = run_pipeline(config)
+
+# with CLI - NOT IMPLEMENTED YET!
+uv run pipeline --n-samples 500
 ```
