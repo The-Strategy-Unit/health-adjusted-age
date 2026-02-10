@@ -1,14 +1,10 @@
 """Public API"""
 
 from .config import DEFAULT_CONFIG, ModelConfig
-from .fitting import fit_all_metalogs
-from .qa_fitting import run_qa
-from .sampling import calculate_model_inputs
+from .pipeline import run_pipeline
 
 __all__ = [
-    "DEFAULT_CONFIG",
+    "run_pipeline",
     "ModelConfig",
-    "fit_all_metalogs",
-    "run_qa",
-    "calculate_model_inputs",
+    "DEFAULT_CONFIG",
 ]
