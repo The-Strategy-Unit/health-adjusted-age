@@ -19,5 +19,7 @@ uv pip install -e .
 uv run python src/health_adjusted_age/__main__.py
 # canonical
 python -m health_adjusted_age
+# [project.scripts] table CLI entry point (in pyproject.toml)
+uv run pipeline
 pytest
 ```

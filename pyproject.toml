@@ -21,7 +21,8 @@ dev = [
     "ruff>=0.1.0",
 ]
 
-# [project.scripts]
+[project.scripts]
+pipeline = "health_adjusted_age.pipeline:run_pipeline"
 
 [build-system]
 requires = ["hatchling"]
