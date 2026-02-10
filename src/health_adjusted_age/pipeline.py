@@ -11,6 +11,26 @@ from health_adjusted_age.sampling import (
 )
 
 
+# ==============================================================================
+# Helper: validate the config
+# ==============================================================================
+def validate_config(config: ModelConfig) -> None:
+    if not config.target_years:
+        raise ValueError("target_years must not be empty")
+
+    if config.n_samples <= 0:
+        raise ValueError("n_samples must be > 0")
+
+    if not config.paths.ex_data_path.exists():
+        raise FileNotFoundError(config.paths.ex_data_path)
+
+    if not config.paths.mix_dist_path.exists():
+        raise FileNotFoundError(config.paths.mix_dist_path)
+
+
+# ==============================================================================
+# Run full pipeline
+# ==============================================================================
 def run_pipeline(config: ModelConfig = ModelConfig()):
     """
     Run the health adjusted ages pipeline.
@@ -21,7 +41,7 @@ def run_pipeline(config: ModelConfig = ModelConfig()):
     Returns:
         Tuple of outputs
     """
-    # validate_config(config)
+    validate_config(config)
 
     fit_all_metalogs(
         mixture_path=config.paths.mix_dist_path,
