@@ -8,7 +8,7 @@ def test_pipeline_smoke(tmp_path):
         DEFAULT_CONFIG,
         paths=replace(
             DEFAULT_CONFIG.paths,
-            out_dir=tmp_path,
+            data_dir=tmp_path,
         ),
         target_years=(2035,),
         n_samples=10,
