@@ -63,3 +63,8 @@ summary, samples = run_pipeline(config)
 # with CLI - NOT IMPLEMENTED YET!
 uv run pipeline --n-samples 500
 ```
+
+```bash
+# render nb without code cells
+jupyter nbconvert --to html --no-input docs/haa_methods.ipynb --output haa_methods.html
+```
