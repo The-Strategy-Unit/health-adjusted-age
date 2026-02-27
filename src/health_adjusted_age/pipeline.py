@@ -1,3 +1,9 @@
+from dataclasses import asdict
+from datetime import datetime
+from pathlib import Path
+
+import tomli_w
+
 from health_adjusted_age.config import ModelConfig
 from health_adjusted_age.fitting import fit_all_metalogs
 from health_adjusted_age.qa_fitting import run_qa
@@ -33,6 +39,19 @@ def validate_config(config: ModelConfig) -> None:
 
 
 # ==============================================================================
+# Helper: log the config used for a run
+# ==============================================================================
+def save_run_config(config: ModelConfig, path: Path) -> None:
+    d = asdict(config)
+    d["timestamp"] = datetime.now().isoformat()
+    d["paths"] = {k: str(v) for k, v in d["paths"].items()}
+    d["metalog"]["boundedness"] = d["metalog"]["boundedness"].value
+    d["metalog"]["method"] = d["metalog"]["method"].value
+    with open(path, "wb") as f:
+        tomli_w.dump(d, f)
+
+
+# ==============================================================================
 # Run full pipeline
 # ==============================================================================
 def run_pipeline(config: ModelConfig = ModelConfig()):
@@ -46,6 +65,7 @@ def run_pipeline(config: ModelConfig = ModelConfig()):
         Tuple of outputs
     """
     validate_config(config)
+    save_run_config(config, config.paths.data_dir / "run_config_log.toml")
 
     fit_all_metalogs(
         mixture_path=config.paths.mix_dist_path,
