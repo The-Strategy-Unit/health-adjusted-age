@@ -38,10 +38,11 @@ class ModelConfig:
     base_year: int = 2021
     hsa_ref_age: int = 65  # Reference age for HAA calculations
     hsa_start_age: int = 55  # Generate HAA for all ages >= hsa_start_age
-    n_samples: int = 10000
-    seed: int = 42
-    dfle_f: float = 10.66  # dfle for females age 65 in base year (2021)
-    dfle_m: float = 10.45  # dfle for males age 65 in base year (2021)
+    n_samples: int = 10000  # Number of HAA samples to generate for each age/sex/year combination  # noqa: E501
+    seed: int = 42  # RNG seed for reproducibility
+    dfle_f: float = 10.66  # DFLE for females age 65 in base year (2021)
+    dfle_m: float = 10.45  # DFLE for males age 65 in base year (2021)
+    run_qa: bool = False  # Whether to run QA checks on fitted distributions
     paths: PathsConfig = PathsConfig()
     metalog: MetalogConfig = MetalogConfig()
 
