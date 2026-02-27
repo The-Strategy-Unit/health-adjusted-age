@@ -73,7 +73,8 @@ def run_pipeline(config: ModelConfig = ModelConfig()):
         metalog_config=config.metalog,
     )
 
-    run_qa(paths=config.paths)
+    if config.run_qa:
+        run_qa(paths=config.paths)
 
     ex_df = filter_ex_data(path=config.paths.ex_data_path, model_config=config)
 
