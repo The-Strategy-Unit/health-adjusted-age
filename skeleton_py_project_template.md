@@ -31,11 +31,13 @@ health-adjusted-age python package now has:
 - a **config system** (immutable, overrideable)
 - a **CLI / script surface**
 
-```bash
+```python
 # run health-adjusted-age pipeline as a library
 from health_adjusted_age import run_pipeline, DEFAULT_CONFIG
 run_pipeline(DEFAULT_CONFIG)
+```
 
+```bash
 # run as a module
 python -m health_adjusted_age
 
@@ -43,7 +45,7 @@ python -m health_adjusted_age
 uv run pipeline
 ```
 
-```bash
+```python
 # changing config options the canonical way
 from dataclasses import replace
 from health_adjusted_age import run_pipeline, DEFAULT_CONFIG
@@ -55,7 +57,9 @@ config = replace(
 )
 
 summary, samples = run_pipeline(config)
+```
 
+```bash
 # with CLI - NOT IMPLEMENTED YET!
 uv run pipeline --n-samples 500
 ```
