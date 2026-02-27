@@ -23,7 +23,8 @@ dev = [
 ]
 
 [project.scripts]
-pipeline = "health_adjusted_age.pipeline:run_pipeline"
+# pipeline = "health_adjusted_age.pipeline:run_pipeline"
+pipeline = "health_adjusted_age.cli:main"
 
 [build-system]
 requires = ["hatchling"]

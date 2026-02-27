@@ -60,8 +60,9 @@ summary, samples = run_pipeline(config)
 ```
 
 ```bash
-# with CLI - NOT IMPLEMENTED YET!
-uv run pipeline --n-samples 500
+# *NEW*
+uv run pipeline --year 2030 --n-samples 500 --run-qa
+uv run pipeline --year 2025 --year 2030 --year 2035 --n-samples 500
 ```
 
 ```bash
