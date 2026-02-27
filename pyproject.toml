@@ -13,8 +13,7 @@ dependencies = [
     "numpy>=2.2.1",
     "pandas>=2.2.3",
     "pyarrow>=18.1.0",
-    "ipykernel>=7.2.0",
-    "jupyter>=1.1.1",
+    "tomli-w>=0.6.0",
 ]
 
 [project.optional-dependencies]
@@ -46,3 +45,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.2.0",
+    "jupyter>=1.1.1",
+]
