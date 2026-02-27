@@ -6,6 +6,7 @@ from health_adjusted_age.sampling import load_hsa_age_samples_from_parquet
 config = replace(
     DEFAULT_CONFIG,
     target_years=(2035,),
+    # target_years=(range(2022, 2051)),
     n_samples=500,
 )
 
