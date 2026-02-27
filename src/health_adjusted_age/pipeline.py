@@ -18,6 +18,10 @@ def validate_config(config: ModelConfig) -> None:
     if not config.target_years:
         raise ValueError("target_years must not be empty")
 
+    valid_years = range(2022, 2051)
+    if invalid := [y for y in config.target_years if y not in valid_years]:
+        raise ValueError(f"target_years contains out-of-range values: {invalid}")
+
     if config.n_samples <= 0:
         raise ValueError("n_samples must be > 0")
 
