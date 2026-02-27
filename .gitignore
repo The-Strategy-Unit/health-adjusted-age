@@ -209,3 +209,4 @@ __marimo__/
 # Custom
 /data_raw/
 /data/
+*.html
