@@ -27,8 +27,8 @@ def filter_ex_data(path: Path, model_config: ModelConfig):
         Starting year for filtering
     hsa_ref_age : int
         Specific age to filter for
-    target_years : int, list of int, or None
-        Specific year(s) to filter for. If None, uses all years between base_year and end_year.
+    target_years : tuple of ints
+        Specific year(s) to filter for
 
     Returns:
     --------
@@ -75,7 +75,7 @@ def filter_ex_data_all_ages(path: Path, model_config: ModelConfig):
         Starting year for filtering
     hsa_start_age : int
         Minimum age to include
-    target_years : int, list of int, or None
+    target_years : tuple of ints
         Specific year(s) to filter for
 
     Returns:
@@ -203,8 +203,8 @@ def calculate_model_inputs(
         Number of samples to draw from each metalog
     seed : int
         Random seed for reproducibility
-    target_years : int, list of int, or None
-        Only calculate for these specific years (None = all years in ex_df)
+    target_years : tuple of ints
+        Only calculate for these specific years
 
     Returns:
     --------
