@@ -11,38 +11,35 @@ HEALTH-ADJUSTED-AGE/
 │   └── health_adjusted_age/  
 │       └── __init__.py     # a very simple module  
 └── tests/
-    └── test_main.py        # example testsource  
-
-```bash
-uv pip install -e .
-# long-hand
-uv run python src/health_adjusted_age/__main__.py
-# canonical
-python -m health_adjusted_age
-# [project.scripts] table CLI entry point (in pyproject.toml)
-uv run pipeline
-# tests
-uv run pytest
-```
-
+    └── test_main.py        # example testsource 
+ 
 health-adjusted-age python package now has:
 - a **library** (importable, testable)
 - a **pipeline** (single entry point)
 - a **config system** (immutable, overrideable)
 - a **CLI / script surface**
 
-```python
-# run health-adjusted-age pipeline as a library
-from health_adjusted_age import run_pipeline, DEFAULT_CONFIG
-run_pipeline(DEFAULT_CONFIG)
+```bash
+# install the current project as an editable pkg
+# editable pkgs do not need to be reinstalled for changes to their source code to be active
+uv pip install -e .
 ```
 
 ```bash
-# run as a module
+# long-hand
+uv run python src/health_adjusted_age/__main__.py
+# canonical
 python -m health_adjusted_age
-
-# run as CLI command
+# cli command - see [project.scripts] in pyproject.toml
 uv run pipeline
+# run tests
+uv run pytest
+```
+
+```python
+# run pipeline as a library
+from health_adjusted_age import run_pipeline, DEFAULT_CONFIG
+run_pipeline(DEFAULT_CONFIG)
 ```
 
 ```python
@@ -53,6 +50,7 @@ from health_adjusted_age import run_pipeline, DEFAULT_CONFIG
 config = replace(
     DEFAULT_CONFIG,
     target_years=(2035,),
+    # target_years=(range(2022, 2051)),
     n_samples=500,
 )
 
@@ -60,7 +58,7 @@ summary, samples = run_pipeline(config)
 ```
 
 ```bash
-# *NEW*
+# *NEW* config options via cli - see cli.py
 uv run pipeline --year 2030 --n-samples 500 --run-qa
 uv run pipeline --year 2025 --year 2030 --year 2035 --n-samples 500
 ```
