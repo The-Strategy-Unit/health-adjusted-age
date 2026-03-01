@@ -164,6 +164,8 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
     # Read data
     print(f"  \nReading data from: {mixture_path}")
     df = pd.read_parquet(mixture_path)
+    # don't fit to baseline 2021
+    df = df[df["year"] > 2021]
 
     # Get unique combinations
     combinations = df.groupby(["year", "sex"]).size().reset_index(name="count")
