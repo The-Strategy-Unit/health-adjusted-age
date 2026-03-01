@@ -6,14 +6,16 @@ import tomli_w
 
 from health_adjusted_age.config import ModelConfig
 from health_adjusted_age.fitting import fit_all_metalogs
+from health_adjusted_age.io_sampling import (
+    save_hsa_age_samples_to_parquet,
+    save_samples_to_parquet,
+)
 from health_adjusted_age.qa_fitting import run_qa
 from health_adjusted_age.sampling import (
     calculate_hsa_ages,
     calculate_model_inputs,
     filter_ex_data,
     filter_ex_data_all_ages,
-    save_hsa_age_samples_to_parquet,
-    save_samples_to_parquet,
 )
 
 
