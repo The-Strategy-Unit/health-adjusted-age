@@ -67,10 +67,3 @@ uv run pipeline --year 2025 --year 2030 --year 2035 --n-samples 500
 # render nb without code cells
 jupyter nbconvert --to html --no-input docs/haa_methods.ipynb --output haa_methods.html
 ```
-
-```bash
-# load packages in dev dependency group (pytest)
-uv sync --dev
-# run deterministic bridge tests
-pytest tests/test_det_bridge.py -v
-```
