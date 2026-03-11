@@ -24,7 +24,7 @@ haa_df <- haa_smp |>
   dplyr::mutate(adj = hsa_age - age) |>
   dplyr::filter(age <= 90L)
 
-labeller <- labeller(sex = c("f" = "F", "m" = "M"))
+labeller <- ggplot2::labeller(sex = c("f" = "F", "m" = "M"))
 
 ggplot2::ggplot(
   data = haa_df,
