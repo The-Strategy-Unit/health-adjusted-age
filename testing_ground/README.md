@@ -30,3 +30,23 @@ NHP model baseline year.
 - 004: Replace deterministic bridge with sample-wise differencing using correlated 
   trajectories — propagates 2021–2025 uncertainty honestly rather than discarding it
 - 005: 2×2 comparison — (independent vs correlated) × (bridge vs sample-wise)
+
+
+## 002 — Alternative Anchor
+
+**Status**: Complete  
+**Date**: 11 March 2026
+
+**Question**: Is the deterministic bridge (001) mathematically equivalent to re-anchoring
+the pipeline to a *new* baseline from first principles e.g., estimating DFLE in 2025
+directly from the 2025 metalog and recomputing equations 3 & 4 with a denominator
+calculated from the new baseline?
+
+**Finding**: Yes - the two methods are numerically equivalent (max abs diff  < 0.02 years,
+consistent with Monte Carlo noise). The deterministic bridge (001) is the simpler
+implementation of the same operation.
+
+**Implementation note**: Both ex lookups in the alternative anchor must filter by
+hsa_ref_age - missing this filter was the source of errors encountered during development.
+
+**Conclusion**: Deterministic bridge (001) is validated and correct. Move to production.
