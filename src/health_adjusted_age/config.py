@@ -22,6 +22,12 @@ class PathsConfig:
     haa_summary_path = data_dir / "haa_summary.csv"
     haa_samples_path = data_dir / "haa_samples.parquet"
 
+    def __post_init__(self):
+        # Create output directories if they don't exist
+        self.fitted_dir.mkdir(parents=True, exist_ok=True)
+        self.qa_dir.mkdir(parents=True, exist_ok=True)
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+
 
 @dataclass(frozen=True)
 class MetalogConfig:
@@ -45,6 +51,13 @@ class ModelConfig:
     run_qa: bool = False  # Whether to run QA checks on fitted distributions
     paths: PathsConfig = PathsConfig()
     metalog: MetalogConfig = MetalogConfig()
+
+    def __post_init__(self):
+        # Validate that target years are >= base year
+        if any(year < self.base_year for year in self.target_years):
+            raise ValueError(
+                "All target years must be greater than or equal to the base year."
+            )
 
 
 DEFAULT_CONFIG = ModelConfig()
