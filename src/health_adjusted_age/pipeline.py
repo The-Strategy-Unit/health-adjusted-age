@@ -20,27 +20,6 @@ from health_adjusted_age.sampling import (
 
 
 # ==============================================================================
-# Helper: validate the config
-# ==============================================================================
-def validate_config(config: ModelConfig) -> None:
-    if not config.target_years:
-        raise ValueError("target_years must not be empty")
-
-    valid_years = range(2022, 2051)
-    if invalid := [y for y in config.target_years if y not in valid_years]:
-        raise ValueError(f"target_years contains out-of-range values: {invalid}")
-
-    if config.n_samples <= 0:
-        raise ValueError("n_samples must be > 0")
-
-    if not config.paths.ex_data_path.exists():
-        raise FileNotFoundError(config.paths.ex_data_path)
-
-    if not config.paths.mix_dist_path.exists():
-        raise FileNotFoundError(config.paths.mix_dist_path)
-
-
-# ==============================================================================
 # Helper: log the config used for a run
 # ==============================================================================
 def save_run_config(config: ModelConfig, path: Path) -> None:
@@ -66,7 +45,6 @@ def run_pipeline(config: ModelConfig):
     Returns:
         Tuple of outputs
     """
-    validate_config(config)
     save_run_config(config, config.paths.data_dir / "run_config_log.toml")
 
     fit_all_metalogs(

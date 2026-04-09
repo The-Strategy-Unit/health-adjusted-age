@@ -54,7 +54,12 @@ class ModelConfig:
 
     def __post_init__(self):
         # Validate that target years are >= base year
-        if any(year < self.base_year for year in self.target_years):
-            raise ValueError(
-                "All target years must be greater than or equal to the base year."
-            )
+        if not self.target_years:
+            raise ValueError("target_years must not be empty")
+
+        valid_years = range(2022, 2051)
+        if invalid := [y for y in self.target_years if y not in valid_years]:
+            raise ValueError(f"target_years contains out-of-range values: {invalid}")
+
+        if self.n_samples <= 0:
+            raise ValueError("n_samples must be > 0")
