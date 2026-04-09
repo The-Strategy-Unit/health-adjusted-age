@@ -1,13 +1,14 @@
 from dataclasses import replace
 
-from health_adjusted_age import DEFAULT_CONFIG, run_pipeline
+from health_adjusted_age import ModelConfig, run_pipeline
 
 
 def test_pipeline_smoke(tmp_path):
+    default_config = ModelConfig()
     config = replace(
-        DEFAULT_CONFIG,
+        default_config,
         paths=replace(
-            DEFAULT_CONFIG.paths,
+            default_config.paths,
             data_dir=tmp_path,
         ),
         target_years=(2035,),

@@ -1,10 +1,10 @@
 from dataclasses import replace
 
-from health_adjusted_age import DEFAULT_CONFIG, run_pipeline
+from health_adjusted_age import ModelConfig, run_pipeline
 from health_adjusted_age.sampling import load_hsa_age_samples_from_parquet
 
 config = replace(
-    DEFAULT_CONFIG,
+    ModelConfig(),
     target_years=(2035,),
     # target_years=(range(2022, 2051)),
     n_samples=500,

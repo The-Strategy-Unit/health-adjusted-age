@@ -58,6 +58,3 @@ class ModelConfig:
             raise ValueError(
                 "All target years must be greater than or equal to the base year."
             )
-
-
-DEFAULT_CONFIG = ModelConfig()

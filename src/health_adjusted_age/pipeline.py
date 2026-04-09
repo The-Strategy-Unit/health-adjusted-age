@@ -56,7 +56,7 @@ def save_run_config(config: ModelConfig, path: Path) -> None:
 # ==============================================================================
 # Run full pipeline
 # ==============================================================================
-def run_pipeline(config: ModelConfig = ModelConfig()):
+def run_pipeline(config: ModelConfig):
     """
     Run the health adjusted ages pipeline.
 

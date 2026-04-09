@@ -1,7 +1,7 @@
 import argparse
 from dataclasses import replace
 
-from health_adjusted_age.config import DEFAULT_CONFIG
+from health_adjusted_age.config import ModelConfig
 from health_adjusted_age.pipeline import run_pipeline
 
 
@@ -31,7 +31,7 @@ def main():
 
     args = parser.parse_args()
 
-    config = DEFAULT_CONFIG
+    config = ModelConfig()
 
     if args.target_years:
         config = replace(
