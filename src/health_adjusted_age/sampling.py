@@ -177,7 +177,7 @@ def calculate_model_inputs(
         raise ValueError(f"No data found for base year {model_config.base_year}")
 
     print(
-        f"\nBase year ({model_config.base_year}) ex values at age {model_config.hsa_ref_age}:"
+        f"\nBase year ({model_config.base_year}) ex values at age {model_config.hsa_ref_age}:"  # noqa: E501
     )
     for _, row in base_data.iterrows():
         print(f"  Sex={row['sex']}: ex={row['ex']:.4f}")
@@ -244,7 +244,7 @@ def calculate_model_inputs(
 
         if abs(denominator) < 1e-10:
             print(
-                f"  ✗ WARNING: Denominator near zero (ex={ex_current:.4f} ≈ ex_base={ex_base:.4f}), skipping..."
+                f"  ✗ WARNING: Denominator near zero (ex={ex_current:.4f} ≈ ex_base={ex_base:.4f}), skipping..."  # noqa: E501
             )
             continue
 
@@ -332,9 +332,11 @@ def calculate_hsa_ages(
     print("=" * 70)
 
     print(f"\nAge range: {model_config.hsa_start_age} to {ex_df_all_ages['age'].max()}")
-    print(
-        f"Total combinations: {len(ex_df_all_ages[ex_df_all_ages['year'] != model_config.base_year])}"
+
+    total_combinations = len(
+        ex_df_all_ages[ex_df_all_ages["year"] != model_config.base_year]
     )
+    print(f"Total combinations: {total_combinations}")
 
     # Get base year data for ex_base lookups
     base_data = ex_df_all_ages[ex_df_all_ages["year"] == model_config.base_year]
@@ -366,7 +368,7 @@ def calculate_hsa_ages(
         if ex_base_key not in ex_base_lookup:
             if row_idx % 100 == 0:
                 print(
-                    f"  ✗ WARNING: No base year data for sex={sex}, age={age}, skipping..."
+                    f"  ✗ WARNING: No base year data for sex={sex}, age={age}, skipping..."  # noqa: E501
                 )
             continue
 
@@ -377,7 +379,7 @@ def calculate_hsa_ages(
         if model_input_key not in delta_dfle_per_ly_samples:
             if row_idx % 100 == 0:
                 print(
-                    f"  ✗ WARNING: No model input samples for year={year}, sex={sex}, skipping..."
+                    f"  ✗ WARNING: No model input samples for year={year}, sex={sex}, skipping..."  # noqa: E501
                 )
             continue
 
