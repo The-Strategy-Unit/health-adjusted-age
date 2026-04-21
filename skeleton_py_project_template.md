@@ -38,17 +38,17 @@ uv run pytest
 
 ```python
 # run pipeline as a library
-from health_adjusted_age import run_pipeline, DEFAULT_CONFIG
-run_pipeline(DEFAULT_CONFIG)
+from health_adjusted_age import run_pipeline, ModelConfig
+run_pipeline(ModelConfig())
 ```
 
 ```python
 # changing config options the canonical way
 from dataclasses import replace
-from health_adjusted_age import run_pipeline, DEFAULT_CONFIG
+from health_adjusted_age import run_pipeline, ModelConfig
 
 config = replace(
-    DEFAULT_CONFIG,
+    ModelConfig(),
     target_years=(2035,),
     # target_years=(range(2022, 2051)),
     n_samples=500,

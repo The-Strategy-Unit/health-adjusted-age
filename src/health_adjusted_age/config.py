@@ -22,6 +22,12 @@ class PathsConfig:
     haa_summary_path = data_dir / "haa_summary.csv"
     haa_samples_path = data_dir / "haa_samples.parquet"
 
+    def __post_init__(self):
+        # Create output directories if they don't exist
+        self.fitted_dir.mkdir(parents=True, exist_ok=True)
+        self.qa_dir.mkdir(parents=True, exist_ok=True)
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+
 
 @dataclass(frozen=True)
 class MetalogConfig:
@@ -46,5 +52,14 @@ class ModelConfig:
     paths: PathsConfig = PathsConfig()
     metalog: MetalogConfig = MetalogConfig()
 
+    def __post_init__(self):
+        # Validate that target years are >= base year
+        if not self.target_years:
+            raise ValueError("target_years must not be empty")
 
-DEFAULT_CONFIG = ModelConfig()
+        valid_years = range(2022, 2051)
+        if invalid := [y for y in self.target_years if y not in valid_years]:
+            raise ValueError(f"target_years contains out-of-range values: {invalid}")
+
+        if self.n_samples <= 0:
+            raise ValueError("n_samples must be > 0")
