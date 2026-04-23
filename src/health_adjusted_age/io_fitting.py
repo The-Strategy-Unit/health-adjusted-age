@@ -7,22 +7,22 @@ from health_adjusted_age.config import MetalogConfig
 
 
 # ==============================================================================
-# Save metalog model using pickle
+# Serialize metalog as JSON
 # ==============================================================================
-def save_metalog_pickle(metalog, year: int, sex: str, output_dir: Path):
-    """Save metalog using pickle format."""
-    filename = f"metalog_{year}_{sex}.pkl"
+def save_metalog_json(metalog, year: int, sex: str, output_dir: Path):
+    """Save metalog using JSON format."""
+    filename = f"metalog_{year}_{sex}.json"
     filepath = output_dir / filename
     metalog.save(str(filepath))
     return filepath
 
 
 # ==============================================================================
-# Save metalog coefficients and metadata as JSON
+# Save metalog snapshot as JSON
 # ==============================================================================
-def save_metalog_coefficients(metalog, year: int, sex: str, output_dir: Path):
-    """Save metalog coefficients and metadata as JSON."""
-    metalog_info = {
+def save_metalog_snapshot(metalog, year: int, sex: str, output_dir: Path):
+    """Save metalog snapshot as JSON."""
+    metalog_snapshot = {
         "year": year,
         "sex": sex,
         "coefficients": metalog.a.tolist(),
@@ -33,11 +33,11 @@ def save_metalog_coefficients(metalog, year: int, sex: str, output_dir: Path):
         "method": str(metalog.method),
     }
 
-    filename = f"metalog_{year}_{sex}.json"
+    filename = f"metalog_snapshot_{year}_{sex}.json"
     filepath = output_dir / filename
 
     with open(filepath, "w") as f:
-        json.dump(metalog_info, f, indent=2)
+        json.dump(metalog_snapshot, f, indent=2)
 
     return filepath
 
@@ -71,8 +71,8 @@ def create_metadata_summary(
                 "n_obs": result["n_obs"],
                 "data_min": result["data_min"],
                 "data_max": result["data_max"],
-                "pickle_file": result["pickle_file"].name,
-                "json_file": result["json_file"].name,
+                "metalog_file": result["metalog_file"].name,
+                "snapshot_file": result["snapshot_file"].name,
             }
         )
 
@@ -87,12 +87,12 @@ def create_metadata_summary(
                 "data_max": failure["data_max"],
                 "error": failure["error"],
                 "error_type": failure["error_type"],
-                "pickle_file": failure["pickle_file"],
-                "json_file": failure["json_file"],
+                "metalog_file": failure["metalog_file"],
+                "snapshot_file": failure["snapshot_file"],
             }
         )
 
-    summary_path = output_dir / "metalog_fits_summary.json"
+    summary_path = output_dir / "metalogs_summary.json"
     with open(summary_path, "w") as f:
         json.dump(summary, f, indent=2)
 

@@ -185,7 +185,7 @@ def run_qa(paths: PathsConfig):
     qa_dir.mkdir(parents=True, exist_ok=True)
 
     # Load summary file to get all fitted combinations
-    summary_path = paths.fitted_dir / "metalog_fits_summary.json"
+    summary_path = paths.fitted_dir / "metalogs_summary.json"
 
     if not summary_path.exists():
         print(f"ERROR: Summary file not found at {summary_path}")
@@ -213,18 +213,18 @@ def run_qa(paths: PathsConfig):
         print(f"[{idx}/{len(summary['fits'])}] Processing: Year={year}, Sex={sex}")
 
         # Load the metalog
-        metalog_path = paths.fitted_dir / fit_info["pickle_file"]
+        metalog_path = paths.fitted_dir / fit_info["metalog_file"]
 
         try:
             metalog = Metalog.load(metalog_path)
-            print(f"  ✓ Loaded metalog from {fit_info['pickle_file']}")
+            print(f"  ✓ Loaded metalog from {fit_info['metalog_file']}")
         except Exception as e:
             print(f"  ✗ ERROR loading metalog: {e}")
             continue
 
         try:
             metalog = Metalog.load(metalog_path)
-            print(f"  ✓ Loaded metalog from {fit_info['pickle_file']}")
+            print(f"  ✓ Loaded metalog from {fit_info['metalog_file']}")
         except Exception as e:
             print(f"  ✗ ERROR loading metalog: {e}")
             continue
