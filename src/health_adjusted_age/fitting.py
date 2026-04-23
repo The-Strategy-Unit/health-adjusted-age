@@ -11,8 +11,8 @@ from metalog_jax.utils import DEFAULT_Y
 from health_adjusted_age.config import MetalogConfig
 from health_adjusted_age.io_fitting import (
     create_metadata_summary,
-    save_metalog_coefficients,
-    save_metalog_pickle,
+    save_metalog_json,
+    save_metalog_snapshot,
 )
 
 
@@ -108,12 +108,12 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
         try:
             metalog = fit_pair_metalog(mix_arr, metalog_config)
 
-            # Save metalog (pickle and JSON formats)
-            pickle_file = save_metalog_pickle(metalog, year, sex, out_dir)
-            json_file = save_metalog_coefficients(metalog, year, sex, out_dir)
+            # Save metalog and snapshot
+            metalog_file = save_metalog_json(metalog, year, sex, out_dir)
+            snapshot_file = save_metalog_snapshot(metalog, year, sex, out_dir)
 
-            print(f"  ✓ Saved pickle: {pickle_file.name}")
-            print(f"  ✓ Saved JSON: {json_file.name}")
+            print(f"  ✓ Saved metalog: {metalog_file.name}")
+            print(f"  ✓ Saved snapshot: {snapshot_file.name}")
 
             # Store result (for successes)
             results.append(
@@ -125,8 +125,8 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
                     "data_min": float(mix_arr.min()),
                     "data_max": float(mix_arr.max()),
                     "metalog": metalog,
-                    "pickle_file": pickle_file,
-                    "json_file": json_file,
+                    "metalog_file": metalog_file,
+                    "snapshot_file": snapshot_file,
                 }
             )
 
@@ -144,8 +144,8 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
                     "data_max": float(mix_arr.max()),
                     "error": str(e),
                     "error_type": type(e).__name__,
-                    "pickle_file": None,
-                    "json_file": None,
+                    "metalog_file": None,
+                    "snapshot_file": None,
                 }
             )
             continue
@@ -179,8 +179,8 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
     print(f"Failed: {failed}/{attempts}")
     print(f"Output directory: {out_dir}")
     print("\nFiles created:")
-    print(f"  - {successful} pickle files (.pkl)")
-    print(f"  - {successful} JSON files (.json)")
+    print(f"  - {successful} metalog files (.json)")
+    print(f"  - {successful} snapshot files (.json)")
     print(f"  - 1 summary file ({summary_path.name})")
 
     return results

@@ -215,7 +215,7 @@ def calculate_model_inputs(
         dfle = model_config.dfle_f if sex == "f" else model_config.dfle_m
 
         # Load metalog for this year-sex combination
-        metalog_path = paths.fitted_dir / f"metalog_{year}_{sex}.pkl"
+        metalog_path = paths.fitted_dir / f"metalog_{year}_{sex}.json"
 
         if not metalog_path.exists():
             print(f"  ✗ WARNING: Metalog not found: {metalog_path}, skipping...")
