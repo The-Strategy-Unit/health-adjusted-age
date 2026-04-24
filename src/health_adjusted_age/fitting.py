@@ -11,7 +11,6 @@ from metalog_jax.utils import DEFAULT_Y
 from health_adjusted_age.config import MetalogConfig
 from health_adjusted_age.io_fitting import (
     create_metadata_summary,
-    save_metalog_snapshot,
     save_metalogs_json,
 )
 
@@ -111,9 +110,6 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
                 dists[year] = {}
             dists[year][sex] = metalog
 
-            snapshot_file = save_metalog_snapshot(metalog, year, sex, out_dir)
-            print(f"  ✓ Saved snapshot: {snapshot_file.name}")
-
             results.append(
                 {
                     "year": year,
@@ -123,7 +119,6 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
                     "data_min": float(mix_arr.min()),
                     "data_max": float(mix_arr.max()),
                     "metalog": metalog,
-                    "snapshot_file": snapshot_file,
                 }
             )
         except Exception as e:
@@ -140,7 +135,6 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
                     "data_max": float(mix_arr.max()),
                     "error": str(e),
                     "error_type": type(e).__name__,
-                    "snapshot_file": None,
                 }
             )
             continue
@@ -179,7 +173,6 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
     print(f"Output directory: {out_dir}")
     print("\nFiles created:")
     print(f"  - 1 metalogs file ({metalog_file.name})")
-    print(f"  - {successful} snapshot files (.json)")
     print(f"  - 1 summary file ({summary_path.name})")
 
     return results

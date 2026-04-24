@@ -45,31 +45,6 @@ def save_metalogs_json(dists: dict, output_path: Path) -> Path:
 
 
 # ==============================================================================
-# Save metalog snapshot as JSON
-# ==============================================================================
-def save_metalog_snapshot(metalog, year: int, sex: str, output_dir: Path):
-    """Save metalog snapshot as JSON."""
-    metalog_snapshot = {
-        "year": year,
-        "sex": sex,
-        "coefficients": metalog.a.tolist(),
-        "num_terms": int(metalog.num_terms),
-        "boundedness": str(metalog.boundedness),
-        "lower_bound": float(metalog.lower_bound),
-        "upper_bound": float(metalog.upper_bound),
-        "method": str(metalog.method),
-    }
-
-    filename = f"metalog_snapshot_{year}_{sex}.json"
-    filepath = output_dir / filename
-
-    with open(filepath, "w") as f:
-        json.dump(metalog_snapshot, f, indent=2)
-
-    return filepath
-
-
-# ==============================================================================
 # Save summary of all fitted metalog models and failures
 # ==============================================================================
 def create_metadata_summary(
@@ -98,7 +73,6 @@ def create_metadata_summary(
                 "n_obs": result["n_obs"],
                 "data_min": result["data_min"],
                 "data_max": result["data_max"],
-                "snapshot_file": result["snapshot_file"].name,
             }
         )
 
@@ -113,7 +87,6 @@ def create_metadata_summary(
                 "data_max": failure["data_max"],
                 "error": failure["error"],
                 "error_type": failure["error_type"],
-                "snapshot_file": failure["snapshot_file"],
             }
         )
 
