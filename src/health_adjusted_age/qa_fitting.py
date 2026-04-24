@@ -10,6 +10,7 @@ import pandas as pd
 from metalog_jax.metalog import Metalog
 
 from health_adjusted_age.config import PathsConfig
+from health_adjusted_age.io_sampling import load_metalogs_json
 
 
 # ==============================================================================
@@ -180,7 +181,6 @@ def run_qa(paths: PathsConfig):
     print("QUALITY ASSURANCE: GENERATING DIAGNOSTIC PLOTS")
     print("=" * 70)
 
-    # Create QA output directory
     qa_dir = Path(paths.qa_dir)
     qa_dir.mkdir(parents=True, exist_ok=True)
 
@@ -198,11 +198,22 @@ def run_qa(paths: PathsConfig):
     print(f"\nFound {summary['successful_fits']} fitted metalogs")
     print(f"QA plots will be saved to: {qa_dir}\n")
 
+    # Load all metalogs from combined file once upfront
+    metalogs_path = paths.fitted_dir / "metalogs.json"
+
+    if not metalogs_path.exists():
+        print(f"ERROR: Combined metalogs file not found at {metalogs_path}")
+        return
+
+    metalogs = load_metalogs_json(metalogs_path)
+    print(
+        f"✓ Loaded combined metalogs file: {sum(len(v) for v in metalogs.values())} year-sex combinations\n"
+    )
+
     # Load original data
     print(f"Loading original data from: {paths.mix_dist_path}")
     df = pd.read_parquet(paths.mix_dist_path)
 
-    # Process each fitted metalog
     qa_results = []
 
     for idx, fit_info in enumerate(summary["fits"], 1):
@@ -212,21 +223,18 @@ def run_qa(paths: PathsConfig):
         print(f"{'-' * 70}")
         print(f"[{idx}/{len(summary['fits'])}] Processing: Year={year}, Sex={sex}")
 
-        # Load the metalog
-        metalog_path = paths.fitted_dir / fit_info["metalog_file"]
-
-        try:
-            metalog = Metalog.load(metalog_path)
-            print(f"  ✓ Loaded metalog from {fit_info['metalog_file']}")
-        except Exception as e:
-            print(f"  ✗ ERROR loading metalog: {e}")
+        # Look up metalog from combined dict
+        if year not in metalogs or sex not in metalogs[year]:
+            print(
+                f"  ✗ WARNING: Metalog not found for year={year}, sex={sex}, skipping..."
+            )
             continue
 
         try:
-            metalog = Metalog.load(metalog_path)
-            print(f"  ✓ Loaded metalog from {fit_info['metalog_file']}")
+            metalog = metalogs[year][sex]
+            print(f"  ✓ Loaded metalog for year={year}, sex={sex}")
         except Exception as e:
-            print(f"  ✗ ERROR loading metalog: {e}")
+            print(f"  ✗ ERROR accessing metalog: {e}")
             continue
 
         # Get original data for this combination
@@ -235,7 +243,6 @@ def run_qa(paths: PathsConfig):
 
         print(f"  Data points: {len(mix_arr)}")
 
-        # Create diagnostic plots
         try:
             result = create_diagnostic_plots(year, sex, mix_arr, metalog, qa_dir)
             qa_results.append(result)
@@ -261,7 +268,6 @@ def run_qa(paths: PathsConfig):
     with open(qa_summary_path, "w") as f:
         json.dump(qa_summary, f, indent=2)
 
-    # Print final summary
     print(f"\n{'=' * 70}")
     print("QA COMPLETE")
     print(f"{'=' * 70}")

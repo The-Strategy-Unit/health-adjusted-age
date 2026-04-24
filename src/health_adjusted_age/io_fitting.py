@@ -9,37 +9,39 @@ from health_adjusted_age.config import MetalogConfig
 # ==============================================================================
 # Serialize metalog as JSON
 # ==============================================================================
-def save_metalog_json(metalog, year: int, sex: str, output_dir: Path):
-    """Save metalog using JSON format."""
-    filename = f"metalog_{year}_{sex}.json"
-    filepath = output_dir / filename
-    metalog.save(str(filepath))
-    return filepath
+def save_metalogs_json(dists: dict, output_path: Path) -> Path:
+    """
+    Save multiple metalog distributions to a single combined JSON file.
 
+    Args:
+        dists: Nested dict of metalog objects: dists[year][sex]
+        output_path: Path for the combined output JSON file
 
-# ==============================================================================
-# Save metalog snapshot as JSON
-# ==============================================================================
-def save_metalog_snapshot(metalog, year: int, sex: str, output_dir: Path):
-    """Save metalog snapshot as JSON."""
-    metalog_snapshot = {
-        "year": year,
-        "sex": sex,
-        "coefficients": metalog.a.tolist(),
-        "num_terms": int(metalog.num_terms),
-        "boundedness": str(metalog.boundedness),
-        "lower_bound": float(metalog.lower_bound),
-        "upper_bound": float(metalog.upper_bound),
-        "method": str(metalog.method),
+    Returns:
+        Path to the written file
+    """
+    combined = {
+        str(year): {
+            sex: json.loads(metalog.dumps()) for sex, metalog in sex_dict.items()
+        }
+        for year, sex_dict in dists.items()
     }
 
-    filename = f"metalog_snapshot_{year}_{sex}.json"
-    filepath = output_dir / filename
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(filepath, "w") as f:
-        json.dump(metalog_snapshot, f, indent=2)
+    with open(output_path, "w") as f:
+        json.dump(combined, f, indent=2)
 
-    return filepath
+    return output_path
+
+
+# def save_metalog_json(metalog, year: int, sex: str, output_dir: Path):
+#     """Save metalog using JSON format."""
+#     filename = f"metalog_{year}_{sex}.json"
+#     filepath = output_dir / filename
+#     metalog.save(str(filepath))
+#     return filepath
 
 
 # ==============================================================================
@@ -71,8 +73,6 @@ def create_metadata_summary(
                 "n_obs": result["n_obs"],
                 "data_min": result["data_min"],
                 "data_max": result["data_max"],
-                "metalog_file": result["metalog_file"].name,
-                "snapshot_file": result["snapshot_file"].name,
             }
         )
 
@@ -87,8 +87,6 @@ def create_metadata_summary(
                 "data_max": failure["data_max"],
                 "error": failure["error"],
                 "error_type": failure["error_type"],
-                "metalog_file": failure["metalog_file"],
-                "snapshot_file": failure["snapshot_file"],
             }
         )
 

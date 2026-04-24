@@ -1,29 +1,59 @@
 """Input-Output sampling helper functions."""
 
+import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+from metalog_jax.metalog import Metalog
+
+
+# ==============================================================================
+# Load metalogs from combined JSON file into nested dict: dists[year][sex]
+# ==============================================================================
+def load_metalogs_json(input_path: Path) -> dict:
+    """
+    Load combined metalogs JSON into nested dict: dists[year][sex]
+
+    Args:
+        input_path: Path to the combined metalogs JSON file
+
+    Returns:
+        Nested dict with integer year keys: dists[2020]["male"]
+    """
+    with open(input_path, "r") as f:
+        combined = json.load(f)
+
+    return {
+        int(year): {
+            sex: Metalog.loads(json.dumps(metalog_data))
+            for sex, metalog_data in sex_dict.items()
+        }
+        for year, sex_dict in combined.items()
+    }
 
 
 # ==============================================================================
 # Save 'change in DFLE per LE year' samples to parquet file
 # ==============================================================================
-def save_samples_to_parquet(samples_dict, path: Path):
+def save_samples_to_parquet(samples_dict: dict, path: Path):
     """Save samples dictionary to parquet file."""
-    # Convert dict to long-format DataFrame
-    records = []
+    frames = []
     for (year, sex), samples in samples_dict.items():
-        for sample_idx, value in enumerate(samples):
-            records.append(
+        n = len(samples)
+        frames.append(
+            pd.DataFrame(
                 {
                     "year": year,
                     "sex": sex,
-                    "sample_idx": sample_idx,
-                    "model_input": value,
+                    "sample_idx": np.arange(n),
+                    "model_input": np.array(samples, dtype=np.float64),
                 }
             )
+        )
 
-    df = pd.DataFrame(records)
+    df = pd.concat(frames, ignore_index=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(path, index=False)
     print(f"✓ Saved {len(samples_dict)} sample distributions to: {path}")
 
