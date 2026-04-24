@@ -11,8 +11,8 @@ from metalog_jax.utils import DEFAULT_Y
 from health_adjusted_age.config import MetalogConfig
 from health_adjusted_age.io_fitting import (
     create_metadata_summary,
-    save_metalog_json,
     save_metalog_snapshot,
+    save_metalogs_json,
 )
 
 
@@ -88,9 +88,9 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
     combinations = df.groupby(["year", "sex"]).size().reset_index(name="count")
     print(f"\nFound {len(combinations)} unique year-sex combinations:")
     print(combinations)
-
     results = []
     failures = []
+    dists = {}  # collect all metalogs: dists[year][sex]
 
     for _, row in combinations.iterrows():
         year = row["year"]
@@ -103,19 +103,17 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
         # Filter and process
         df_filtered = df[(df["year"] == year) & (df["sex"] == sex)]
         mix_arr = df_filtered["mix_vals"].explode().astype(float).to_numpy()
-
-        # Fit metalog
         try:
             metalog = fit_pair_metalog(mix_arr, metalog_config)
 
-            # Save metalog and snapshot
-            metalog_file = save_metalog_json(metalog, year, sex, out_dir)
-            snapshot_file = save_metalog_snapshot(metalog, year, sex, out_dir)
+            # Collect into nested dict
+            if year not in dists:
+                dists[year] = {}
+            dists[year][sex] = metalog
 
-            print(f"  ✓ Saved metalog: {metalog_file.name}")
+            snapshot_file = save_metalog_snapshot(metalog, year, sex, out_dir)
             print(f"  ✓ Saved snapshot: {snapshot_file.name}")
 
-            # Store result (for successes)
             results.append(
                 {
                     "year": year,
@@ -125,11 +123,9 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
                     "data_min": float(mix_arr.min()),
                     "data_max": float(mix_arr.max()),
                     "metalog": metalog,
-                    "metalog_file": metalog_file,
                     "snapshot_file": snapshot_file,
                 }
             )
-
         except Exception as e:
             print(f"  ✗ ERROR fitting metalog: {e}")
 
@@ -144,11 +140,14 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
                     "data_max": float(mix_arr.max()),
                     "error": str(e),
                     "error_type": type(e).__name__,
-                    "metalog_file": None,
                     "snapshot_file": None,
                 }
             )
             continue
+
+    # Save all metalogs to single combined JSON after the loop
+    metalog_file = save_metalogs_json(dists, out_dir / "metalogs.json")
+    print(f"\n✓ Saved combined metalogs: {metalog_file.name}")
 
     # Count successes in the list
     successful = len(results)
@@ -179,8 +178,141 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
     print(f"Failed: {failed}/{attempts}")
     print(f"Output directory: {out_dir}")
     print("\nFiles created:")
-    print(f"  - {successful} metalog files (.json)")
+    print(f"  - 1 metalogs file ({metalog_file.name})")
     print(f"  - {successful} snapshot files (.json)")
     print(f"  - 1 summary file ({summary_path.name})")
 
     return results
+
+
+# def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogConfig):
+#     """
+#     Fit metalog distributions to all year-sex combinations.
+
+#     Parameters
+#     ----------
+#     mixture_path : Path
+#         Path to mixtures parquet file
+#     out_dir : Path
+#         Location for saving fitted distributions
+#     metalog_config : (Dict[str, Any])
+#         Configuration options with num_terms, lower_bound, upper_bound
+
+#     Returns
+#     -------
+#     list
+#         List of results with metadata for each fit
+#     """
+#     # Create output directory
+#     out_dir.mkdir(parents=True, exist_ok=True)
+
+#     print("=" * 90)
+#     print("FITTING DISTRIBUTIONS TO ALL YEAR-SEX COMBINATIONS")
+#     print("=" * 90)
+
+#     # Read data
+#     print(f"  \nReading data from: {mixture_path}")
+#     df = pd.read_parquet(mixture_path)
+#     # don't fit to baseline 2021
+#     df = df[df["year"] > 2021]
+
+#     # Get unique combinations
+#     combinations = df.groupby(["year", "sex"]).size().reset_index(name="count")
+#     print(f"\nFound {len(combinations)} unique year-sex combinations:")
+#     print(combinations)
+
+#     results = []
+#     failures = []
+
+#     for _, row in combinations.iterrows():
+#         year = row["year"]
+#         sex = row["sex"]
+
+#         print(f"  \n{'-' * 90}")
+#         print(f"  Processing: Year={year}, Sex={sex}")
+#         print(f"  {'-' * 90}")
+
+#         # Filter and process
+#         df_filtered = df[(df["year"] == year) & (df["sex"] == sex)]
+#         mix_arr = df_filtered["mix_vals"].explode().astype(float).to_numpy()
+
+#         # Fit metalog
+#         try:
+#             metalog = fit_pair_metalog(mix_arr, metalog_config)
+
+#             # Save metalog and snapshot
+#             metalog_file = save_metalog_json(metalog, year, sex, out_dir)
+#             snapshot_file = save_metalog_snapshot(metalog, year, sex, out_dir)
+
+#             print(f"  ✓ Saved metalog: {metalog_file.name}")
+#             print(f"  ✓ Saved snapshot: {snapshot_file.name}")
+
+#             # Store result (for successes)
+#             results.append(
+#                 {
+#                     "year": year,
+#                     "sex": sex,
+#                     "success": True,
+#                     "n_obs": len(mix_arr),
+#                     "data_min": float(mix_arr.min()),
+#                     "data_max": float(mix_arr.max()),
+#                     "metalog": metalog,
+#                     "metalog_file": metalog_file,
+#                     "snapshot_file": snapshot_file,
+#                 }
+#             )
+
+#         except Exception as e:
+#             print(f"  ✗ ERROR fitting metalog: {e}")
+
+#             # Store failure information
+#             failures.append(
+#                 {
+#                     "year": year,
+#                     "sex": sex,
+#                     "success": False,
+#                     "n_obs": len(mix_arr),
+#                     "data_min": float(mix_arr.min()),
+#                     "data_max": float(mix_arr.max()),
+#                     "error": str(e),
+#                     "error_type": type(e).__name__,
+#                     "metalog_file": None,
+#                     "snapshot_file": None,
+#                 }
+#             )
+#             continue
+
+#     # Count successes in the list
+#     successful = len(results)
+#     failed = len(failures)
+#     attempts = len(results) + len(failures)
+
+#     if failed > 0:
+#         print("\nFailed combinations:")
+#         for f in failures:
+#             print(f"  Year={f['year']}, Sex={f['sex']}: {f['error']}")
+
+#     print(f"Successful: {successful}")
+#     print(f"Failed: {failed}")
+
+#     # Create summary file
+#     print(f"\n{'=' * 90}")
+#     print("CREATING SUMMARY")
+#     print(f"{'=' * 90}")
+
+#     summary_path = create_metadata_summary(results, failures, out_dir, metalog_config)
+#     print(f"\n✓ Created summary: {summary_path.name}")
+
+#     # Final summary
+#     print(f"\n{'=' * 70}")
+#     print("COMPLETE")
+#     print(f"{'=' * 70}")
+#     print(f"Successful: {successful}/{attempts}")
+#     print(f"Failed: {failed}/{attempts}")
+#     print(f"Output directory: {out_dir}")
+#     print("\nFiles created:")
+#     print(f"  - {successful} metalog files (.json)")
+#     print(f"  - {successful} snapshot files (.json)")
+#     print(f"  - 1 summary file ({summary_path.name})")
+
+#     return results
