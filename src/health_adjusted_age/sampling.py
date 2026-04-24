@@ -6,10 +6,10 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 from metalog_jax.base import MetalogRandomVariableParameters
-from metalog_jax.metalog import Metalog
 from metalog_jax.utils import JaxUniformDistributionParameters
 
 from health_adjusted_age.config import ModelConfig, PathsConfig
+from health_adjusted_age.io_sampling import load_metalogs_json
 
 
 # ==============================================================================
@@ -121,22 +121,10 @@ def calculate_model_inputs(
     -----------
     ex_df : pd.DataFrame
         Filtered life expectancy data (output from filter_ex_data)
-    metalogs_dir : Path
-        Directory containing fitted metalog files
-    base_year : int
-        Base year for ex_base calculation
-    hsa_ref_age : int
-        Reference age (should match the age in ex_df)
-    dfle_f : float
-        Disability-free life expectancy constant for females
-    dfle_m : float
-        Disability-free life expectancy constant for males
-    n_samples : int
-        Number of samples to draw from each metalog
-    seed : int
-        Random seed for reproducibility
-    target_years : tuple of ints
-        Only calculate for these specific years
+    paths : PathsConfig
+        Paths configuration including fitted_dir for metalogs
+    model_config : ModelConfig
+        Configuration with base_year, hsa_ref_age, dfle_f, dfle_m, n_samples, seed, target_years
 
     Returns:
     --------
@@ -163,6 +151,7 @@ def calculate_model_inputs(
         print(f"\nCalculating for specific years: {target_years}")
     else:
         ex_df_filtered = ex_df
+        target_years = sorted(ex_df["year"].unique().tolist())
         print("\nCalculating for all years")
 
     print(f"\nInput data shape: {ex_df_filtered.shape}")
@@ -177,7 +166,7 @@ def calculate_model_inputs(
         raise ValueError(f"No data found for base year {model_config.base_year}")
 
     print(
-        f"\nBase year ({model_config.base_year}) ex values at age {model_config.hsa_ref_age}:"  # noqa: E501
+        f"\nBase year ({model_config.base_year}) ex values at age {model_config.hsa_ref_age}:"
     )
     for _, row in base_data.iterrows():
         print(f"  Sex={row['sex']}: ex={row['ex']:.4f}")
@@ -189,6 +178,27 @@ def calculate_model_inputs(
 
     # Filter out base year from processing
     ex_df_to_process = ex_df_filtered[ex_df_filtered["year"] != model_config.base_year]
+
+    # Determine which years we actually need to process
+    years_to_process = sorted(ex_df_to_process["year"].unique().tolist())
+
+    print(f"\n{'=' * 70}")
+    print("LOADING METALOGS")
+    print(f"{'=' * 70}")
+
+    # Load combined metalogs file and filter to only years needed
+    all_metalogs = load_metalogs_json(paths.fitted_dir / "metalogs.json")
+
+    metalogs = {
+        year: all_metalogs[year] for year in years_to_process if year in all_metalogs
+    }
+
+    missing_years = [y for y in years_to_process if y not in all_metalogs]
+    if missing_years:
+        print(f"  ✗ WARNING: No metalogs found for years: {missing_years}")
+
+    print(f"  ✓ Loaded metalogs for years: {sorted(metalogs.keys())}")
+    print(f"  ✓ Total year-sex combinations: {sum(len(v) for v in metalogs.values())}")
 
     print(f"\n{'=' * 70}")
     print(f"PROCESSING {len(ex_df_to_process)} YEAR-SEX COMBINATIONS")
@@ -214,15 +224,15 @@ def calculate_model_inputs(
         # Get dfle constant for this sex
         dfle = model_config.dfle_f if sex == "f" else model_config.dfle_m
 
-        # Load metalog for this year-sex combination
-        metalog_path = paths.fitted_dir / f"metalog_{year}_{sex}.json"
-
-        if not metalog_path.exists():
-            print(f"  ✗ WARNING: Metalog not found: {metalog_path}, skipping...")
+        # Look up metalog from filtered dict
+        if year not in metalogs or sex not in metalogs[year]:
+            print(
+                f"  ✗ WARNING: Metalog not found for year={year}, sex={sex}, skipping..."
+            )
             continue
 
         try:
-            metalog = Metalog.load(metalog_path)
+            metalog = metalogs[year][sex]
             print("  ✓ Loaded metalog")
         except Exception as e:
             print(f"  ✗ ERROR loading metalog: {e}, skipping...")
@@ -244,7 +254,7 @@ def calculate_model_inputs(
 
         if abs(denominator) < 1e-10:
             print(
-                f"  ✗ WARNING: Denominator near zero (ex={ex_current:.4f} ≈ ex_base={ex_base:.4f}), skipping..."  # noqa: E501
+                f"  ✗ WARNING: Denominator near zero (ex={ex_current:.4f} ≈ ex_base={ex_base:.4f}), skipping..."
             )
             continue
 
@@ -416,7 +426,7 @@ def calculate_hsa_ages(
         results.append(result)
 
         if len(results) % 100 == 0:
-            print(f"Processed {len(results)} combinations...")
+            print(f"Processed {len(results)} combinations ...")
 
     # Convert to DataFrame
     results_df = pd.DataFrame(results)
