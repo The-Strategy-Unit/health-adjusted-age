@@ -30,6 +30,8 @@ class PathsConfig:
 
 
 @dataclass(frozen=True)
+# important! config can't be mutated at runtime, so the hash saved at the end of act 1
+# is guaranteed to represent what was actually used for fitting
 class MetalogConfig:
     boundedness: MetalogBoundedness = MetalogBoundedness.BOUNDED
     lower_bound: float = 0.0
