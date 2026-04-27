@@ -1,10 +1,4 @@
-from health_adjusted_age.config import ModelConfig
-from health_adjusted_age.pipeline import run_pipeline
-
-
-def main():
-    run_pipeline(ModelConfig())
-
+from health_adjusted_age.cli import main
 
 if __name__ == "__main__":
     main()
