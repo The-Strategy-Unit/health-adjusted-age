@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from metalog_jax.base import MetalogBoundedness, MetalogFitMethod
@@ -30,6 +30,8 @@ class PathsConfig:
 
 
 @dataclass(frozen=True)
+# important! config can't be mutated at runtime, so the hash saved at the end of act 1
+# is guaranteed to represent what was actually used for fitting
 class MetalogConfig:
     boundedness: MetalogBoundedness = MetalogBoundedness.BOUNDED
     lower_bound: float = 0.0
@@ -39,18 +41,21 @@ class MetalogConfig:
 
 
 @dataclass(frozen=True)
-class ModelConfig:
+class FittingConfig:
+    run_qa: bool = False  # Whether to run QA checks on fitted distributions
+    metalog: MetalogConfig = MetalogConfig()
+
+
+@dataclass(frozen=True)
+class SamplingConfig:
     target_years: tuple[int, ...] = (2035,)
     base_year: int = 2021
     hsa_ref_age: int = 65  # Reference age for HAA calculations
     hsa_start_age: int = 55  # Generate HAA for all ages >= hsa_start_age
-    n_samples: int = 10000  # Number of HAA samples to generate for each age/sex/year combination  # noqa: E501
+    n_samples: int = 10_000  # Number of HAA samples to generate for each age/sex/year
     seed: int = 42  # RNG seed for reproducibility
     dfle_f: float = 10.66  # DFLE for females age 65 in base year (2021)
     dfle_m: float = 10.45  # DFLE for males age 65 in base year (2021)
-    run_qa: bool = False  # Whether to run QA checks on fitted distributions
-    paths: PathsConfig = PathsConfig()
-    metalog: MetalogConfig = MetalogConfig()
 
     def __post_init__(self):
         # Validate that target years are >= base year
@@ -63,3 +68,25 @@ class ModelConfig:
 
         if self.n_samples <= 0:
             raise ValueError("n_samples must be > 0")
+
+
+@dataclass(frozen=True)
+class ModelConfig:
+    paths: PathsConfig = PathsConfig()
+    fitting: FittingConfig = FittingConfig()
+    sampling: SamplingConfig = SamplingConfig()
+
+
+# ==============================================================================
+# Helpers for updating nested frozen dataclasses
+# ==============================================================================
+def with_metalog(config: ModelConfig, **kwargs) -> ModelConfig:
+    return with_fitting(config, metalog=replace(config.fitting.metalog, **kwargs))
+
+
+def with_fitting(config: ModelConfig, **kwargs) -> ModelConfig:
+    return replace(config, fitting=replace(config.fitting, **kwargs))
+
+
+def with_sampling(config: ModelConfig, **kwargs) -> ModelConfig:
+    return replace(config, sampling=replace(config.sampling, **kwargs))
