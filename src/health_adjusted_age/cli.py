@@ -38,7 +38,7 @@ def build_config(args: argparse.Namespace) -> ModelConfig:
     """Build a ModelConfig from parsed CLI args, overriding defaults as needed."""
     config = ModelConfig()
 
-    if getattr(args, "target_years", None):
+    if getattr(args, "target_years", None) is not None:
         config = with_sampling(config, target_years=tuple(args.target_years))
         # alternative using replace (more verbose, but doesn't require helper
         # function)
@@ -47,7 +47,7 @@ def build_config(args: argparse.Namespace) -> ModelConfig:
         #     sampling=replace(config.sampling, target_years=tuple(args.target_years)),
         # )
 
-    if getattr(args, "n_samples", None):
+    if getattr(args, "n_samples", None) is not None:
         config = with_sampling(config, n_samples=args.n_samples)
 
     if getattr(args, "run_qa", False):
