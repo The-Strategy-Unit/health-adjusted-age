@@ -26,7 +26,7 @@ def fit_pair_metalog(mix_vals: np.ndarray, metalog_config: MetalogConfig):
     ----------
     mix_vals : np.ndarray
         Values to fit
-    metalog_config : (Dict[str, Any])
+    metalog_config : MetalogConfig
         Configuration options with num_terms, lower_bound, upper_bound
 
     Returns
@@ -62,7 +62,7 @@ def fit_all_metalogs(mixture_path: Path, out_dir: Path, metalog_config: MetalogC
         Path to mixtures parquet file
     out_dir : Path
         Location for saving fitted distributions
-    metalog_config : (Dict[str, Any])
+    metalog_config : MetalogConfig
         Configuration options with num_terms, lower_bound, upper_bound
 
     Returns
