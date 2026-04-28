@@ -26,41 +26,62 @@ uv pip install -e .
 ```
 
 ```bash
-# long-hand
-uv run python src/health_adjusted_age/__main__.py
-# canonical
-python -m health_adjusted_age
-# cli command - see [project.scripts] in pyproject.toml
-uv run pipeline
+# runs __main__.py directly - works but bypasses the entry point mechanism
+uv run python src/health_adjusted_age/__main__.py run
+# runs the package as a module - the canonical Python way
+uv run python -m health_adjusted_age run
+# uses the registered entry point from pyproject.toml - what you'd normally use
+uv run haa run
+```
+
+```bash
+# via CLI (see cli.py)
+# inside project environment managed by uv
+uv run haa fit --run-qa
+# generates log run_config_fitting.toml
+# data/fitted_dist/metalogs.json, metalogs_summary.json, metalog_config.hash
+# data/fitted_dist/qa/qa_metalog_2022_f.png etc. qa_summary.json
+uv run haa sample --year 2035 --n-samples 500
+# generates log run_config_sampling.toml
+# data/haa_inputs_samples.parquet, haa_inputs_summary.csv
+# data/haa_samples.parquet, haa_summary.csv
+uv run haa run --year 2035 --run-qa
+# all above
+# ask for help
+uv run haa --help
+uv run haa fit --help
+uv run haa sample --help
+uv run haa run --help
+# error handling
+uv run haa sample --year 9999 # should hit valid_years validation
+uv run haa sample --year 2035 --n-samples 0  # should hit n_samples check
+uv run haa sample # runs with defaults
+uv run haa # should error: subcommand required
 # run tests
 uv run pytest
 ```
 
 ```python
-# run pipeline as a library
-from health_adjusted_age import run_pipeline, ModelConfig
-run_pipeline(ModelConfig())
+# from a Python script - import and call directly
+from health_adjusted_age.config import ModelConfig, with_fitting, with_sampling
+from health_adjusted_age.pipeline import run_metalog_fitting, run_haa_sampling
+
+config = ModelConfig()
+config = with_sampling(config, target_years=(2035, 2040), n_samples=5000)
+config = with_fitting(config, run_qa=True)
+
+run_metalog_fitting(config)
+haa_df, haa_samples, = run_haa_sampling(config)
+haa_df, haa_samples, = run_pipeline(config)
 ```
 
 ```python
-# changing config options the canonical way
-from dataclasses import replace
-from health_adjusted_age import run_pipeline, ModelConfig
+# from a Python script - simulate CLI args
+from health_adjusted_age.cli import main
+import sys
 
-config = replace(
-    ModelConfig(),
-    target_years=(2035,),
-    # target_years=(range(2022, 2051)),
-    n_samples=500,
-)
-
-summary, samples = run_pipeline(config)
-```
-
-```bash
-# *NEW* config options via cli - see cli.py
-uv run pipeline --year 2030 --n-samples 500 --run-qa
-uv run pipeline --year 2025 --year 2030 --year 2035 --n-samples 500
+sys.argv = ["haa", "sample", "--year", "2035", "--n-samples", "5000"]
+main()
 ```
 
 ```bash
