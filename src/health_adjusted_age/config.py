@@ -80,6 +80,10 @@ class ModelConfig:
 # ==============================================================================
 # Helpers for updating nested frozen dataclasses
 # ==============================================================================
+def with_metalog(config: ModelConfig, **kwargs) -> ModelConfig:
+    return with_fitting(config, metalog=replace(config.fitting.metalog, **kwargs))
+
+
 def with_fitting(config: ModelConfig, **kwargs) -> ModelConfig:
     return replace(config, fitting=replace(config.fitting, **kwargs))
 
