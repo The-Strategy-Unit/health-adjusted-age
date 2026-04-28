@@ -28,8 +28,10 @@ def save_run_config(config: ModelConfig, path: Path) -> None:
     d = asdict(config)
     d["timestamp"] = datetime.now().isoformat()
     d["paths"] = {k: str(v) for k, v in d["paths"].items()}
-    d["metalog"]["boundedness"] = d["metalog"]["boundedness"].value
-    d["metalog"]["method"] = d["metalog"]["method"].value
+    d["fitting"]["metalog"]["boundedness"] = d["fitting"]["metalog"][
+        "boundedness"
+    ].value
+    d["fitting"]["metalog"]["method"] = d["fitting"]["metalog"]["method"].value
     with open(path, "wb") as f:
         tomli_w.dump(d, f)
 
@@ -52,7 +54,7 @@ def _assert_fitted_dir_exists(config: ModelConfig) -> None:
 # verify it matches at the start of act 2
 # ==============================================================================
 def _compute_metalog_hash(config: ModelConfig) -> str:
-    d = asdict(config.metalog)
+    d = asdict(config.fitting.metalog)
     # normalise enums to their values so the string is stable
     d["boundedness"] = d["boundedness"].value
     d["method"] = d["method"].value
@@ -93,11 +95,11 @@ def run_metalog_fitting(config: ModelConfig):
     fit_all_metalogs(
         mixture_path=config.paths.mix_dist_path,
         out_dir=config.paths.fitted_dir,
-        metalog_config=config.metalog,
+        metalog_config=config.fitting.metalog,
     )
     _save_metalog_hash(config)  # <-- save hash at end of act 1
 
-    if config.run_qa:
+    if config.fitting.run_qa:
         run_qa(paths=config.paths)
 
 
@@ -114,10 +116,13 @@ def run_haa_sampling(config: ModelConfig):
 
     save_run_config(config, config.paths.data_dir / "run_config_sampling.toml")
 
-    ex_df = filter_ex_data(path=config.paths.ex_data_path, model_config=config)
+    ex_df = filter_ex_data(
+        path=config.paths.ex_data_path,
+        sampling_config=config.sampling,
+    )
 
     summary, delta_dfle_per_ly_samples = calculate_model_inputs(
-        ex_df=ex_df, paths=config.paths, model_config=config
+        ex_df=ex_df, paths=config.paths, sampling_config=config.sampling
     )
 
     summary.to_csv(config.paths.delta_dfle_per_ly_summary_path, index=False)
@@ -126,13 +131,13 @@ def run_haa_sampling(config: ModelConfig):
     )
 
     ex_df_all_ages = filter_ex_data_all_ages(
-        path=config.paths.ex_data_path, model_config=config
+        path=config.paths.ex_data_path, sampling_config=config.sampling
     )
 
     haa_df, haa_samples = calculate_hsa_ages(
         ex_df_all_ages=ex_df_all_ages,
         delta_dfle_per_ly_samples=delta_dfle_per_ly_samples,
-        model_config=config,
+        sampling_config=config.sampling,
     )
 
     haa_df.to_csv(config.paths.haa_summary_path, index=False)

@@ -1,7 +1,6 @@
 import argparse
-from dataclasses import replace
 
-from health_adjusted_age.config import ModelConfig
+from health_adjusted_age.config import ModelConfig, with_fitting, with_sampling
 from health_adjusted_age.pipeline import (
     run_haa_sampling,
     run_metalog_fitting,
@@ -40,13 +39,19 @@ def build_config(args: argparse.Namespace) -> ModelConfig:
     config = ModelConfig()
 
     if getattr(args, "target_years", None):
-        config = replace(config, target_years=tuple(args.target_years))
+        config = with_sampling(config, target_years=tuple(args.target_years))
+        # alternative using replace (more verbose, but doesn't require helper
+        # function)
+        # config = replace(
+        #     config,
+        #     sampling=replace(config.sampling, target_years=tuple(args.target_years)),
+        # )
 
     if getattr(args, "n_samples", None):
-        config = replace(config, n_samples=args.n_samples)
+        config = with_sampling(config, n_samples=args.n_samples)
 
     if getattr(args, "run_qa", False):
-        config = replace(config, run_qa=True)
+        config = with_fitting(config, run_qa=True)
 
     return config
 

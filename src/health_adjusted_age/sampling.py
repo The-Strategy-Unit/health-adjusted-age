@@ -8,14 +8,14 @@ import pandas as pd
 from metalog_jax.base import MetalogRandomVariableParameters
 from metalog_jax.utils import JaxUniformDistributionParameters
 
-from health_adjusted_age.config import ModelConfig, PathsConfig
+from health_adjusted_age.config import PathsConfig, SamplingConfig
 from health_adjusted_age.io_sampling import load_metalogs_json
 
 
 # ==============================================================================
 # Filtering LE data helpers
 # ==============================================================================
-def filter_ex_data(path: Path, model_config: ModelConfig):
+def filter_ex_data(path: Path, sampling_config: SamplingConfig):
     """
     Filter life expectancy data for a specific age.
 
@@ -41,28 +41,28 @@ def filter_ex_data(path: Path, model_config: ModelConfig):
 
     # Apply basic filters using boolean indexing
     ex_dat = ex_dat[
-        (ex_dat["type"] == "period") & (ex_dat["age"] == model_config.hsa_ref_age)
+        (ex_dat["type"] == "period") & (ex_dat["age"] == sampling_config.hsa_ref_age)
     ]
 
     # Apply year filter if specified
-    if model_config.target_years is not None:
+    if sampling_config.target_years is not None:
         # Convert single year to list
-        if isinstance(model_config.target_years, int):
-            target_years = [model_config.target_years]
+        if isinstance(sampling_config.target_years, int):
+            target_years = [sampling_config.target_years]
         else:
-            target_years = list(model_config.target_years)
+            target_years = list(sampling_config.target_years)
 
         # Filter for specific years (plus base year which is always needed)
-        years_to_keep = list(set([model_config.base_year] + target_years))
+        years_to_keep = list(set([sampling_config.base_year] + target_years))
         ex_dat = ex_dat[ex_dat["year"].isin(years_to_keep)]
 
         print(f"Filtering for specific years: {target_years}")
-        print(f"(Including base year {model_config.base_year} for calculations)")
+        print(f"(Including base year {sampling_config.base_year} for calculations)")
 
     return ex_dat
 
 
-def filter_ex_data_all_ages(path: Path, model_config: ModelConfig):
+def filter_ex_data_all_ages(path: Path, sampling_config: SamplingConfig):
     """
     Filter life expectancy data for all ages >= hsa_start_age.
     Used for hsa_age calculations.
@@ -89,17 +89,17 @@ def filter_ex_data_all_ages(path: Path, model_config: ModelConfig):
 
     # Apply basic filters using boolean indexing
     ex_dat = ex_dat[
-        (ex_dat["type"] == "period") & (ex_dat["age"] >= model_config.hsa_start_age)
+        (ex_dat["type"] == "period") & (ex_dat["age"] >= sampling_config.hsa_start_age)
     ]
 
     # Apply year filter if specified
-    if model_config.target_years is not None:
-        if isinstance(model_config.target_years, int):
-            target_years = [model_config.target_years]
+    if sampling_config.target_years is not None:
+        if isinstance(sampling_config.target_years, int):
+            target_years = [sampling_config.target_years]
         else:
-            target_years = list(model_config.target_years)
+            target_years = list(sampling_config.target_years)
 
-        years_to_keep = list(set([model_config.base_year] + target_years))
+        years_to_keep = list(set([sampling_config.base_year] + target_years))
         ex_dat = ex_dat[ex_dat["year"].isin(years_to_keep)]
 
     return ex_dat
@@ -109,7 +109,7 @@ def filter_ex_data_all_ages(path: Path, model_config: ModelConfig):
 # Generate samples for change in DFLE per LE year
 # ==============================================================================
 def calculate_model_inputs(
-    ex_df: pd.DataFrame, paths: PathsConfig, model_config: ModelConfig
+    ex_df: pd.DataFrame, paths: PathsConfig, sampling_config: SamplingConfig
 ):
     """
     Calculate model inputs using the formula:
@@ -123,8 +123,9 @@ def calculate_model_inputs(
         Filtered life expectancy data (output from filter_ex_data)
     paths : PathsConfig
         Paths configuration including fitted_dir for metalogs
-    model_config : ModelConfig
-        Configuration with base_year, hsa_ref_age, dfle_f, dfle_m, n_samples, seed, target_years
+    sampling_config : SamplingConfig
+        Configuration with base_year, hsa_ref_age, dfle_f, dfle_m, n_samples, seed,
+        target_years
 
     Returns:
     --------
@@ -138,15 +139,15 @@ def calculate_model_inputs(
     print("=" * 70)
 
     # Filter for target years if specified
-    if model_config.target_years is not None:
-        if isinstance(model_config.target_years, int):
-            target_years = [model_config.target_years]
+    if sampling_config.target_years is not None:
+        if isinstance(sampling_config.target_years, int):
+            target_years = [sampling_config.target_years]
         else:
-            target_years = list(model_config.target_years)
+            target_years = list(sampling_config.target_years)
 
         # Filter ex_df but keep base year data
         ex_df_filtered = ex_df[
-            ex_df["year"].isin([model_config.base_year] + target_years)
+            ex_df["year"].isin([sampling_config.base_year] + target_years)
         ]
         print(f"\nCalculating for specific years: {target_years}")
     else:
@@ -157,16 +158,17 @@ def calculate_model_inputs(
     print(f"\nInput data shape: {ex_df_filtered.shape}")
     print(f"Years: {sorted(ex_df_filtered['year'].unique())}")
     print(f"Sexes: {sorted(ex_df_filtered['sex'].unique())}")
-    print(f"Age: {model_config.hsa_ref_age}")
+    print(f"Age: {sampling_config.hsa_ref_age}")
 
     # Get base year ex values for each sex
-    base_data = ex_df_filtered[ex_df_filtered["year"] == model_config.base_year]
+    base_data = ex_df_filtered[ex_df_filtered["year"] == sampling_config.base_year]
 
     if len(base_data) == 0:
-        raise ValueError(f"No data found for base year {model_config.base_year}")
+        raise ValueError(f"No data found for base year {sampling_config.base_year}")
 
     print(
-        f"\nBase year ({model_config.base_year}) ex values at age {model_config.hsa_ref_age}:"
+        f"\nBase year ({sampling_config.base_year}) ex values at age "
+        f"{sampling_config.hsa_ref_age}:"
     )
     for _, row in base_data.iterrows():
         print(f"  Sex={row['sex']}: ex={row['ex']:.4f}")
@@ -177,7 +179,9 @@ def calculate_model_inputs(
         ex_base_dict[row["sex"]] = row["ex"]
 
     # Filter out base year from processing
-    ex_df_to_process = ex_df_filtered[ex_df_filtered["year"] != model_config.base_year]
+    ex_df_to_process = ex_df_filtered[
+        ex_df_filtered["year"] != sampling_config.base_year
+    ]
 
     # Determine which years we actually need to process
     years_to_process = sorted(ex_df_to_process["year"].unique().tolist())
@@ -222,12 +226,13 @@ def calculate_model_inputs(
         ex_base = ex_base_dict[sex]
 
         # Get dfle constant for this sex
-        dfle = model_config.dfle_f if sex == "f" else model_config.dfle_m
+        dfle = sampling_config.dfle_f if sex == "f" else sampling_config.dfle_m
 
         # Look up metalog from filtered dict
         if year not in metalogs or sex not in metalogs[year]:
             print(
-                f"  ✗ WARNING: Metalog not found for year={year}, sex={sex}, skipping..."
+                f"  ✗ WARNING: Metalog not found for year={year}, sex={sex},"
+                " skipping..."
             )
             continue
 
@@ -241,9 +246,9 @@ def calculate_model_inputs(
         # Sample QOI from metalog using JAX random sampling
         rv_params = MetalogRandomVariableParameters(
             prng_params=JaxUniformDistributionParameters(
-                seed=model_config.seed + len(summary_results)
+                seed=sampling_config.seed + len(summary_results)
             ),
-            size=model_config.n_samples,
+            size=sampling_config.n_samples,
         )
         qoi_samples = metalog.rvs(rv_params)
 
@@ -254,7 +259,8 @@ def calculate_model_inputs(
 
         if abs(denominator) < 1e-10:
             print(
-                f"  ✗ WARNING: Denominator near zero (ex={ex_current:.4f} ≈ ex_base={ex_base:.4f}), skipping..."
+                f"  ✗ WARNING: Denominator near zero "
+                f"(ex={ex_current:.4f} ≈ ex_base={ex_base:.4f}), skipping..."
             )
             continue
 
@@ -270,7 +276,7 @@ def calculate_model_inputs(
             "id": row["id"],
             "sex": sex,
             "year": year,
-            "age": model_config.hsa_ref_age,
+            "age": sampling_config.hsa_ref_age,
             "ex": ex_current,
             "ex_base": ex_base,
             "dfle": dfle,
@@ -314,7 +320,7 @@ def calculate_model_inputs(
 def calculate_hsa_ages(
     ex_df_all_ages: pd.DataFrame,
     delta_dfle_per_ly_samples: dict,
-    model_config: ModelConfig,
+    sampling_config: SamplingConfig,
 ):
     """
     Calculate hsa_age distributions for all ages >= hsa_start_age using the formula:
@@ -341,15 +347,17 @@ def calculate_hsa_ages(
     print("CALCULATING HSA AGES")
     print("=" * 70)
 
-    print(f"\nAge range: {model_config.hsa_start_age} to {ex_df_all_ages['age'].max()}")
+    print(
+        f"\nAge range: {sampling_config.hsa_start_age} to {ex_df_all_ages['age'].max()}"
+    )
 
     total_combinations = len(
-        ex_df_all_ages[ex_df_all_ages["year"] != model_config.base_year]
+        ex_df_all_ages[ex_df_all_ages["year"] != sampling_config.base_year]
     )
     print(f"Total combinations: {total_combinations}")
 
     # Get base year data for ex_base lookups
-    base_data = ex_df_all_ages[ex_df_all_ages["year"] == model_config.base_year]
+    base_data = ex_df_all_ages[ex_df_all_ages["year"] == sampling_config.base_year]
 
     # Create lookup dict for ex_base by sex and age
     ex_base_lookup = {}
@@ -358,7 +366,9 @@ def calculate_hsa_ages(
         ex_base_lookup[key] = row["ex"]
 
     # Filter out base year
-    ex_df_to_process = ex_df_all_ages[ex_df_all_ages["year"] != model_config.base_year]
+    ex_df_to_process = ex_df_all_ages[
+        ex_df_all_ages["year"] != sampling_config.base_year
+    ]
 
     print(f"\n{'=' * 70}")
     print(f"PROCESSING {len(ex_df_to_process)} YEAR-SEX-AGE COMBINATIONS")
@@ -378,7 +388,8 @@ def calculate_hsa_ages(
         if ex_base_key not in ex_base_lookup:
             if row_idx % 100 == 0:
                 print(
-                    f"  ✗ WARNING: No base year data for sex={sex}, age={age}, skipping..."  # noqa: E501
+                    f"  ✗ WARNING: No base year data for sex={sex}, age={age}",
+                    " skipping...",
                 )
             continue
 
@@ -389,7 +400,8 @@ def calculate_hsa_ages(
         if model_input_key not in delta_dfle_per_ly_samples:
             if row_idx % 100 == 0:
                 print(
-                    f"  ✗ WARNING: No model input samples for year={year}, sex={sex}, skipping..."  # noqa: E501
+                    f"  ✗ WARNING: No model input samples for year={year}, sex={sex}"
+                    " skipping..."
                 )
             continue
 
