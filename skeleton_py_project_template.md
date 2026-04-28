@@ -90,8 +90,21 @@ jupyter nbconvert --to html --no-input docs/haa_methods.ipynb --output haa_metho
 ```
 
 ```bash
+# first create fixtures
+uv run python create_fixtures.py  # one-off
 # load packages in dev dependency group (pytest)
 uv sync --dev
-# run deterministic bridge tests
-pytest tests/test_det_bridge.py -v
+# run a whole file
+uv run pytest tests/test_pipeline_smoke.py -v
+# run a single test function
+uv run pytest tests/test_pipeline_smoke.py::test_run_fitting_creates_outputs -v
+# run a single class
+uv run pytest tests/test_det_bridge.py::TestComputeDeterministicBridge -v
+# run a single method within a class
+uv run pytest tests/test_det_bridge.py::TestComputeDeterministicBridge::test_keys_are_sex_age_tuples -v
+# run all tests matching a keyword
+uv run pytest -k "hash" -v        # runs all tests with "hash" in the name
+uv run pytest -k "fitting" -v     # runs all tests with "fitting" in the name
+# run everything
+uv run pytest -v
 ```

@@ -7,26 +7,41 @@ from metalog_jax.base import MetalogBoundedness, MetalogFitMethod
 @dataclass(frozen=True)
 class PathsConfig:
     project_root: Path = Path(__file__).parent.parent.parent
-    # data dirs
-    raw_data_dir: Path = project_root / "data_raw"
-    data_dir: Path = project_root / "data"
-    # output dirs
-    fitted_dir = data_dir / "fitted_dist"
-    qa_dir = fitted_dir / "qa"
-    # input files
-    ex_data_path: Path = raw_data_dir / "life_tables_2022b.csv"
-    mix_dist_path: Path = raw_data_dir / "mixtures.parquet"
-    # output files
-    delta_dfle_per_ly_summary_path = data_dir / "haa_inputs_summary.csv"
-    delta_dfle_per_ly_samples_path = data_dir / "haa_inputs_samples.parquet"
-    haa_summary_path = data_dir / "haa_summary.csv"
-    haa_samples_path = data_dir / "haa_samples.parquet"
+    raw_data_dir: Path | None = None
+    data_dir: Path | None = None
+    fitted_dir: Path | None = None
+    qa_dir: Path | None = None
+    ex_data_path: Path | None = None
+    mix_dist_path: Path | None = None
+    delta_dfle_per_ly_summary_path: Path | None = None
+    delta_dfle_per_ly_samples_path: Path | None = None
+    haa_summary_path: Path | None = None
+    haa_samples_path: Path | None = None
 
     def __post_init__(self):
-        # Create output directories if they don't exist
-        self.fitted_dir.mkdir(parents=True, exist_ok=True)
-        self.qa_dir.mkdir(parents=True, exist_ok=True)
-        self.data_dir.mkdir(parents=True, exist_ok=True)
+        raw: Path = self.raw_data_dir or self.project_root / "data_raw"
+        data: Path = self.data_dir or self.project_root / "data"
+        fitted: Path = data / "fitted_dist"
+        qa: Path = fitted / "qa"
+
+        object.__setattr__(self, "raw_data_dir", raw)
+        object.__setattr__(self, "data_dir", data)
+        object.__setattr__(self, "fitted_dir", fitted)
+        object.__setattr__(self, "qa_dir", qa)
+        object.__setattr__(self, "ex_data_path", raw / "life_tables_2022b.csv")
+        object.__setattr__(self, "mix_dist_path", raw / "mixtures.parquet")
+        object.__setattr__(
+            self, "delta_dfle_per_ly_summary_path", data / "haa_inputs_summary.csv"
+        )
+        object.__setattr__(
+            self, "delta_dfle_per_ly_samples_path", data / "haa_inputs_samples.parquet"
+        )
+        object.__setattr__(self, "haa_summary_path", data / "haa_summary.csv")
+        object.__setattr__(self, "haa_samples_path", data / "haa_samples.parquet")
+
+        fitted.mkdir(parents=True, exist_ok=True)
+        qa.mkdir(parents=True, exist_ok=True)
+        data.mkdir(parents=True, exist_ok=True)
 
 
 @dataclass(frozen=True)
