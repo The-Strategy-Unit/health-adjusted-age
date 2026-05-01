@@ -171,9 +171,9 @@ def run_haa_sampling(config: ModelConfig):
             if year in output_years
         }
 
-        haa_df = compute_haa_summary(haa_samples)
-        haa_df.to_csv(config.paths.haa_summary_path, index=False)
-        save_hsa_age_samples_to_parquet(haa_samples, config.paths.haa_samples_path)
+    haa_df = compute_haa_summary(haa_samples)
+    haa_df.to_csv(config.paths.haa_summary_path, index=False)
+    save_hsa_age_samples_to_parquet(haa_samples, config.paths.haa_samples_path)
 
     return haa_df, haa_samples
 
