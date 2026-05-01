@@ -44,9 +44,8 @@ def test_run_fitting_creates_outputs(fixture_config):
 def test_run_sampling_returns_results(fixture_config):
     """Stage 2: should return non-empty dataframe and samples dict."""
     run_metalog_fitting(fixture_config)
-    haa_df, haa_samples = run_haa_sampling(fixture_config)
+    haa_samples = run_haa_sampling(fixture_config)
 
-    assert not haa_df.empty
     assert len(haa_samples) > 0
 
 
