@@ -25,7 +25,7 @@
   "files.eol": "\n",
   "editor.wordWrap": "on",
   "editor.tabSize": 2,
-  "editor.rulers": [90, 120],
+  "editor.rulers": [88, 120],
   "workbench.colorCustomizations": {
     "editorRuler.foreground": "#ff8eb5"
   },
