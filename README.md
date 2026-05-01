@@ -147,6 +147,7 @@ tests/
     fixtures/               # minimal synthetic data for testing
     test_hash.py            # config fingerprinting tests
     test_pipeline_smoke.py  # end-to-end pipeline tests
+    test_rebase.py          # HAA rebasing tests
 create_fixtures.py  # generates synthetic test fixtures
 pyproject.toml      # project metadata and dependencies
 uv.lock             # locked dependency versions (do not edit manually)
