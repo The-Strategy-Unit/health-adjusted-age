@@ -38,15 +38,15 @@ The pipeline runs in two stages.
 
 ### Stage 1: fit metalogs (run once)
 ```bash
-uv run haa fit           # run with default config
-uv run haa fit --run-qa  # run and generate QA statistics & diagnostic plots
+haa fit           # run with default config
+haa fit --run-qa  # run and generate QA statistics & diagnostic plots
 ```
 
 ### Stage 2: generate HAA distributions (run as needed)
 ```bash
-uv run haa sample                              # run with default config (year=2035; n-samples = 10_000)
-uv run haa sample --year 2035 --year 2040      # multiple years
-uv run haa sample --year 2035 --n-samples 500  # fewer samples (faster, for testing)
+haa sample                              # run with default config (year=2035; n-samples = 10_000)
+haa sample --year 2035 --year 2040      # multiple years
+haa sample --year 2035 --n-samples 500  # fewer samples (faster, for testing)
 ```
 
 ### Rebasing HAA distributions
@@ -60,7 +60,7 @@ a `--year` argument so that the pipeline can compute a new baseline:
 
 ```bash
 # anchor HAA to 2025 - outputs for 2035 only (2025 is dropped after rebasing is performed)
-uv run haa sample --rebase-year 2025 --year 2025 --year 2035
+haa sample --rebase-year 2025 --year 2025 --year 2035
 ```
 
 Note that the rebase year itself is not included in the outputs&mdash;it is used 
@@ -68,7 +68,7 @@ internally to compute a new baseline and then dropped.
 
 ### Run both stages end-to-end
 ```bash
-uv run haa run --run-qa --year 2035
+haa run --run-qa --year 2035
 ```
 
 ### When to re-run Stage 1
@@ -95,7 +95,7 @@ Default configuration is defined in `src/health_adjusted_age/config.py`. The mos
 
 | Parameter | Default | Description |
 |---|---|---|
-| `rebase_year` | `2021` | Year to rebase HAA distributions to |
+| `rebase_year` | `None` | Year to rebase HAA distributions to |
 | `target_years` | `(2035,)` | Years to generate HAA estimates for |
 | `n_samples` | `10_000` | Sample size per age/sex/year combination |
 
