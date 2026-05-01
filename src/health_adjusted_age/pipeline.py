@@ -37,6 +37,9 @@ def save_run_config(config: ModelConfig, path: Path) -> None:
         "boundedness"
     ].value
     d["fitting"]["metalog"]["method"] = d["fitting"]["metalog"]["method"].value
+    # tomli_w can't serialise None - convert to empty string
+    if d["sampling"]["rebase_year"] is None:
+        d["sampling"]["rebase_year"] = ""
     with open(path, "wb") as f:
         tomli_w.dump(d, f)
 
