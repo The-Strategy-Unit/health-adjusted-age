@@ -11,6 +11,12 @@ from health_adjusted_age.pipeline import (
 def add_sampling_args(parser: argparse.ArgumentParser) -> None:
     """Add arguments that are relevant to the sampling stage."""
     parser.add_argument(
+        "--rebase-year",
+        type=int,
+        dest="rebase_year",
+        help="Rebase HAA distributions to this year (default: 2021)",
+    )
+    parser.add_argument(
         "--year",
         type=int,
         action="append",
@@ -20,7 +26,7 @@ def add_sampling_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--n-samples",
         type=int,
-        help="Number of samples",
+        help="Number of samples (default: 10_000)",
     )
 
 
@@ -37,6 +43,9 @@ def add_fitting_args(parser: argparse.ArgumentParser) -> None:
 def build_config(args: argparse.Namespace) -> ModelConfig:
     """Build a ModelConfig from parsed CLI args, overriding defaults as needed."""
     config = ModelConfig()
+
+    if getattr(args, "rebase_year", None) is not None:
+        config = with_sampling(config, rebase_year=args.rebase_year)
 
     if getattr(args, "target_years", None) is not None:
         config = with_sampling(config, target_years=tuple(args.target_years))

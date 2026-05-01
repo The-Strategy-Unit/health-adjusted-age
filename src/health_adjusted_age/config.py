@@ -65,6 +65,7 @@ class FittingConfig:
 class SamplingConfig:
     target_years: tuple[int, ...] = (2035,)
     base_year: int = 2021
+    rebase_year: int = 2021  # Year to rebase HAA distributions to (default: base_year)
     hsa_ref_age: int = 65  # Reference age for HAA calculations
     hsa_start_age: int = 55  # Generate HAA for all ages >= hsa_start_age
     n_samples: int = 10_000  # Number of HAA samples to generate for each age/sex/year
