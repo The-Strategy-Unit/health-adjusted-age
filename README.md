@@ -53,18 +53,14 @@ haa sample --year 2035 --n-samples 500  # fewer samples (faster, for testing)
 
 By default, HAA distributions are anchored to 2021&mdash;the base year for the forecasts of future health status. In this anchor year, HAA equals chronological age by definition.
 
-If you want to anchor HAA to a different year (for example, to reflect a 
-more recent starting point for planning purposes), you can rebase the 
-distributions using `--rebase-year`. The rebase year must also be passed as 
-a `--year` argument so that the pipeline can compute a new baseline:
+If you want to anchor HAA to a different year (for example, to reflect a more recent starting point for planning purposes), you can rebase the  distributions using `--rebase-year`. The rebase year must also be passed as a `--year` argument so that the pipeline can compute a new baseline:
 
 ```bash
-# anchor HAA to 2025 - outputs for 2035 only (2025 is dropped after rebasing is performed)
+# anchor HAA to 2025 - outputs for 2035 (2025 outputs are dropped after rebasing is performed)
 haa sample --rebase-year 2025 --year 2025 --year 2035
 ```
 
-Note that the rebase year itself is not included in the outputs&mdash;it is used 
-internally to compute a new baseline and then dropped.
+Note that the rebase year itself is not included in the outputs&mdash;it is used internally to compute a new baseline and then dropped.
 
 ### Run both stages end-to-end
 ```bash
