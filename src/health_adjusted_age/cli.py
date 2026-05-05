@@ -21,7 +21,7 @@ def add_sampling_args(parser: argparse.ArgumentParser) -> None:
         type=int,
         action="append",
         dest="target_years",
-        help="Target year (repeatable, e.g. --year 2035 --year 2040)",
+        help="Target year (repeatable, e.g. --year 2035 --year 2045)",
     )
     parser.add_argument(
         "--n-samples",
