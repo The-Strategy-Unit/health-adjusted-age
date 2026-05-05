@@ -321,7 +321,7 @@ def calculate_hsa_ages(
     ex_df_all_ages: pd.DataFrame,
     delta_dfle_per_ly_samples: dict,
     sampling_config: SamplingConfig,
-):
+) -> dict:
     """
     Calculate hsa_age distributions for all ages >= hsa_start_age using the formula:
     hsa_age_{y,s,i} = age_i - (model_input_{y,s} * (ex_{y,s,i} - ex_{base,s,i}))
@@ -374,7 +374,6 @@ def calculate_hsa_ages(
     print(f"PROCESSING {len(ex_df_to_process)} YEAR-SEX-AGE COMBINATIONS")
     print(f"{'=' * 70}\n")
 
-    results = []
     hsa_samples_dict = {}  # Store full samples: {(year, sex, age): array}
 
     for row_idx, (idx, row) in enumerate(ex_df_to_process.iterrows()):
@@ -415,43 +414,4 @@ def calculate_hsa_ages(
         # Store full samples for later use
         hsa_samples_dict[(year, sex, age)] = np.array(hsa_age_samples)
 
-        # Store result with summary statistics
-        result = {
-            "base": row["base"],
-            "type": row["type"],
-            "id": row["id"],
-            "sex": sex,
-            "year": year,
-            "age": age,
-            "ex": ex_current,
-            "ex_base": ex_base,
-            "ex_diff": ex_diff,
-            "hsa_age_mean": float(np.mean(hsa_age_samples)),
-            "hsa_age_median": float(np.median(hsa_age_samples)),
-            "hsa_age_std": float(np.std(hsa_age_samples)),
-            "hsa_age_q25": float(np.quantile(hsa_age_samples, 0.25)),
-            "hsa_age_q75": float(np.quantile(hsa_age_samples, 0.75)),
-            "hsa_age_q05": float(np.quantile(hsa_age_samples, 0.05)),
-            "hsa_age_q95": float(np.quantile(hsa_age_samples, 0.95)),
-        }
-
-        results.append(result)
-
-        if len(results) % 100 == 0:
-            print(f"Processed {len(results)} combinations ...")
-
-    # Convert to DataFrame
-    results_df = pd.DataFrame(results)
-
-    print(f"\n{'=' * 70}")
-    print("SUMMARY")
-    print(f"{'=' * 70}")
-    print(f"Successfully calculated {len(results_df)} hsa_age distributions")
-    print("\nSample results:")
-    print(
-        results_df[
-            ["year", "sex", "age", "hsa_age_mean", "hsa_age_median", "hsa_age_std"]
-        ].head(20)
-    )  # noqa: E501
-
-    return results_df, hsa_samples_dict
+    return hsa_samples_dict

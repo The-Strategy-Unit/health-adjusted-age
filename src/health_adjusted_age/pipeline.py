@@ -13,6 +13,11 @@ from health_adjusted_age.io_sampling import (
     save_samples_to_parquet,
 )
 from health_adjusted_age.qa_fitting import run_qa
+from health_adjusted_age.rebase import (
+    compute_baseline_haa_means,
+    compute_haa_summary,
+    rebase_haa_distributions,
+)
 from health_adjusted_age.sampling import (
     calculate_hsa_ages,
     calculate_model_inputs,
@@ -32,6 +37,9 @@ def save_run_config(config: ModelConfig, path: Path) -> None:
         "boundedness"
     ].value
     d["fitting"]["metalog"]["method"] = d["fitting"]["metalog"]["method"].value
+    # tomli_w can't serialise None - convert to empty string
+    if d["sampling"]["rebase_year"] is None:
+        d["sampling"]["rebase_year"] = ""
     with open(path, "wb") as f:
         tomli_w.dump(d, f)
 
@@ -134,12 +142,36 @@ def run_haa_sampling(config: ModelConfig):
         path=config.paths.ex_data_path, sampling_config=config.sampling
     )
 
-    haa_df, haa_samples = calculate_hsa_ages(
+    haa_samples = calculate_hsa_ages(
         ex_df_all_ages=ex_df_all_ages,
         delta_dfle_per_ly_samples=delta_dfle_per_ly_samples,
         sampling_config=config.sampling,
     )
 
+    if config.sampling.rebase_year is not None:
+        baseline_means = compute_baseline_haa_means(
+            config.sampling.rebase_year, haa_samples
+        )
+        haa_samples = rebase_haa_distributions(
+            baseline_means, haa_samples, config.sampling.rebase_year
+        )
+        # drop the rebase year itself - needed for baseline calculation but not a
+        # meaningful output
+        output_years = set(config.sampling.target_years) - {config.sampling.rebase_year}
+        # guard
+        if not output_years:
+            raise ValueError(
+                "No output years remaining after excluding rebase year "
+                f"{config.sampling.rebase_year}. "
+                "Specify at least one --year other than the rebase year."
+            )
+        haa_samples = {
+            (year, sex, age): samples
+            for (year, sex, age), samples in haa_samples.items()
+            if year in output_years
+        }
+
+    haa_df = compute_haa_summary(haa_samples)
     haa_df.to_csv(config.paths.haa_summary_path, index=False)
     save_hsa_age_samples_to_parquet(haa_samples, config.paths.haa_samples_path)
 
