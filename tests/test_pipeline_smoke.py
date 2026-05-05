@@ -27,7 +27,7 @@ def fixture_config(tmp_path):
         ),
         fitting=FittingConfig(run_qa=False),
         sampling=SamplingConfig(
-            target_years=(2035,),
+            target_years=(2045,),
             n_samples=10,
         ),
     )

@@ -63,7 +63,7 @@ class FittingConfig:
 
 @dataclass(frozen=True)
 class SamplingConfig:
-    target_years: tuple[int, ...] = (2035,)
+    target_years: tuple[int, ...] = (2045,)
     base_year: int = 2021
     rebase_year: int | None = None
     # Year to rebase HAA distributions to (default: None)

@@ -14,7 +14,7 @@ from health_adjusted_age.rebase import (
 REBASE_YEAR = 2025
 SEXES = ["f", "m"]
 AGES = [55, 65, 75]
-YEARS = [2025, 2035]
+YEARS = [2025, 2045]
 
 
 @pytest.fixture
@@ -73,7 +73,7 @@ class TestComputeBaselineHaaMeans:
     def test_ignores_non_rebase_years(self, haa_samples):
         """Only the rebase year should contribute to baseline means."""
         means = compute_baseline_haa_means(REBASE_YEAR, haa_samples)
-        # 2035 samples have loc=age too but means should match 2025 not 2035
+        # 2045 samples have loc=age too but means should match 2025 not 2045
         for (sex, age), mean in means.items():
             expected = np.mean(haa_samples[(REBASE_YEAR, sex, age)])
             np.testing.assert_almost_equal(mean, expected, decimal=6)
@@ -191,7 +191,7 @@ class TestComputeHaaSummary:
     # edge case check with a single entry dict of constant values (all 63.5)
     def test_single_key(self):
         """Should handle a single key without errors."""
-        samples = {(2035, "f", 65): np.ones(100) * 63.5}
+        samples = {(2045, "f", 65): np.ones(100) * 63.5}
         result = compute_haa_summary(samples)
         assert len(result) == 1
         assert result["hsa_age_mean"].iloc[0] == 63.5
