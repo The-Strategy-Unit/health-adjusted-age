@@ -71,9 +71,9 @@ sys.argv = ["haa", "sample", "--year", "2045", "--n-samples", "500"]
 main()
 ```
 
-```bash
+```powershell
 # render nb without code cells
-jupyter nbconvert --to html --no-input docs/haa_methods.ipynb --output haa_methods.html
+jupyter nbconvert --to html --no-input docs/metalog_approximation.ipynb --output metalog_approximation.html
 ```
 
 ```bash
