@@ -210,3 +210,7 @@ __marimo__/
 /data_raw/
 /data/
 *.html
+
+# Quarto runtime assets
+*_files/
+.quarto/
