@@ -78,10 +78,17 @@ Stage 2 will raise an error if the metalog config has changed since the last fit
 
 Place the following files in `data_raw/` before running:
 
-| File | Description |
-|---|---|
-| `life_tables_2022b.csv` | Life expectancy projections with columns `base, type, id, sex, year, age, ex` |
-| `mixtures.parquet` | Health status [mixture distributions](https://en.wikipedia.org/wiki/Mixture_distribution) with columns `year, sex, mix_vals` |
+| File | Description | Source |
+|---|---|---|
+| `life_tables_2022b.csv` | Period life expectancy projections with columns `base, type, id, sex, year, age, ex` | Principal projection England from [ONS 2022-based life tables](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/lifeexpectancies/bulletins/pastandprojecteddatafromtheperiodandcohortlifetables/2022baseduk1981to2072) |
+| `mixtures.parquet` | Health status [mixture distributions](https://en.wikipedia.org/wiki/Mixture_distribution) with columns `year, sex, mix_vals` | Output from [elication exercise repository](https://github.com/The-Strategy-Unit/health-status-ee-exercise/) |
+
+Baseline disability-free life expectancy (DFLE) at age 65 for 2020-2022 is hardcoded in `config.py`.
+
+| Value | Description | Source |
+|---|---|---|
+| `dfle_f: 10.66` | DFLE for females age 65 for 2020-2022 | [ONS health state life expectancies](https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/healthandlifeexpectancies/bulletins/healthstatelifeexpectanciesuk/between2011to2013and2020to2022) |
+| `dfle_m: 10.45` | DFLE for males age 65 for 2020-2022| [ONS health state life expectancies](https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/healthandlifeexpectancies/bulletins/healthstatelifeexpectanciesuk/between2011to2013and2020to2022) |
 
 ## Configuration
 
