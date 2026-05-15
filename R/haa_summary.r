@@ -60,7 +60,7 @@ summary_df <- haa_df %>%
 
 facet_labels <- ggplot2::labeller(sex = c("f" = "Females", "m" = "Males"))
 title <- paste0("Differences between chronological age and health adjusted age (HAA), 2045") # nolint: line_length_linter.
-subtitle <- paste0("Shaded ribbons indicate P25-P75 (inner) and P10-P90 (outer) uncertainty intervals") # nolint: line_length_linter.
+subtitle <- paste0("Shaded ribbons indicate P25-P75 (inner) and P10-P90 (outer) uncertainty intervals; base year set to 2025") # nolint: line_length_linter.
 
 # y-axis scaled to show 2045 values from 2025 baseline. If config changes,
 # limits and breaks may need updating.
