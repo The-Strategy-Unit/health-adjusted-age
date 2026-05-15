@@ -24,6 +24,16 @@ pal_sex <- c("#D55E00", "#0072B2")
 # read haa samples ----
 haa_smp <- arrow::read_parquet(here::here("data", "haa_samples.parquet"))
 
+# plot is for documentation and should be run with following config
+# target_years = 2045; rebase_year = 2025; sample_n = 10_000;
+validate_df <- function(df) {
+  if (unique(df$year) != 2045 || max(df$sample_idx) != 9999) {
+    stop("Validation failed: year must be 2045 and n_sample must be 10_000 for this plot.") # nolint: line_length_linter.
+  }
+}
+
+validate_df(haa_smp)
+
 # plot HAA by age and sex
 mn_adj <- haa_smp |>
   dplyr::mutate(adj = hsa_age - age) |>
@@ -50,7 +60,10 @@ summary_df <- haa_df %>%
 
 facet_labels <- ggplot2::labeller(sex = c("f" = "Females", "m" = "Males"))
 title <- paste0("Differences between chronological age and health adjusted age (HAA), 2045") # nolint: line_length_linter.
-subtitle <- paste0("Shaded ribbons indicate P25-P75 (inner) and P10-P90 (outer) uncertainty intervals") # nolint: line_length_linter.
+subtitle <- paste0("Shaded ribbons indicate P25-P75 (inner) and P10-P90 (outer) uncertainty intervals; base year set to 2025") # nolint: line_length_linter.
+
+# y-axis scaled to show 2045 values from 2025 baseline. If config changes,
+# limits and breaks may need updating.
 
 p1 <- ggplot() +
   # y=0 reference line
@@ -90,14 +103,14 @@ p1 <- ggplot() +
   #   data = summary_df
   # ) +
   annotate(
-    geom = "text", x = 75, y = 1.4,
+    geom = "text", x = 75, y = 1.8,
     label = "HAA > chron. age",
     hjust = 0, vjust = 1,
     size = 4,
     color = "#686f73"
   ) +
   annotate(
-    geom = "text", x = 75, y = -3.6,
+    geom = "text", x = 75, y = -4.6,
     label = "HAA < chron. age",
     hjust = 0, vjust = 1,
     size = 4,
@@ -112,8 +125,9 @@ p1 <- ggplot() +
   ) +
   scale_y_continuous(
     name = NULL,
-    limits = c(-4.5, 1.5),
-    breaks = seq(-8, 4, by = 1)
+    limits = c(-8, 2),
+    breaks = seq(-8, 4, by = 1),
+    expand = expansion(add = c(0.5, 0.5))
   ) +
   labs(
     title = title,
